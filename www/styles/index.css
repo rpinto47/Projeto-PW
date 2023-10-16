@@ -38,8 +38,11 @@ section {
     margin-bottom: 20px;
 }
 
-.receita img {
+.imagens img {
     max-width: 100%;
+    height: auto;
+    width: 300px; /* Defina a largura desejada */
+    height: 200px; /* Defina a altura desejada */
 }
 
 form label, form textarea, form input {
