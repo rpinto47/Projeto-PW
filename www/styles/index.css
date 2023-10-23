@@ -1,85 +1,96 @@
+:root {
+  --font-size-base: 16px;
+  --font-family: Arial, sans-serif;
+  --background-color-header: #333;
+  --text-color-header: #fff;
+  --padding-header: 1.5em;
+  --text-align-header: center;
+  --list-padding-nav: 0;
+  --display-receitas: flex;
+  --flex-wrap-receitas: wrap;
+  --justify-content-receitas: space-around;
+  --color-link: #fff;
+  --margin-imagem: 1.25em; 
+  --margin-h3: 0.625em 0; 
+  --padding-section: 1.25em; 
+  --margin-bottom-receita: 1.25em; 
+  --background-color-footer: #333;
+  --text-align-footer: center;
+  --padding-footer: 1.5em;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
   margin: 0;
   padding: 0;
 }
 
 header {
-  background-color: #333;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-}
-
-header h1 {
-  margin: 0;
+  background-color: var(--background-color-header);
+  color: var(--text-color-header);
+  padding: var(--padding-header);
+  text-align: var(--text-align-header);
 }
 
 nav ul {
   list-style-type: none;
-  padding: 0;
+  padding: var(--list-padding-nav);
 }
 
 nav li {
   display: inline;
-  margin-right: 20px;
+  margin-right: 1.25em; /* 20px at 16px base font size */
 }
 
 nav a {
-  text-decoration: none;
-  color: #fff;
+  color: var(--color-link);
 }
 
 #receitas {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+  display: var(--display-receitas);
+  flex-wrap: var(--flex-wrap-receitas);
+  justify-content: var(--justify-content-receitas);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
 .imagens {
   width: 30%;
-  margin-bottom: 20px;
+  margin-bottom: var(--margin-imagem);
   text-align: center;
+  position: relative;
 }
 
 .imagens img {
-  max-width: 70%;
-  max-width: 70%;
+  width: 100%;
   height: auto;
-  width: 300px;
-  height: 200px;
+  display: block;
+  aspect-ratio: 1;
 }
 
 .imagens h3 {
-  margin: 10px 0;
+  margin: var(--margin-h3);
 }
 
 .imagens p {
   margin: 0;
 }
 
+a {
+  text-decoration: none;
+  
+}
+
 section {
-  padding: 20px;
+  padding: var(--padding-section);
 }
 
 .receita {
-  margin-bottom: 20px;
-}
-
-form label,
-form textarea,
-form input {
-  display: block;
-  margin-bottom: 10px;
+  margin-bottom: var(--margin-bottom-receita);
 }
 
 footer {
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  padding: 10px;
+  background-color: var(--background-color-footer);
+  color: var(--text-color-header);
+  text-align: var(--text-align-footer);
+  padding: var(--padding-footer);
 }
