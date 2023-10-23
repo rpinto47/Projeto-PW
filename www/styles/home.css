@@ -1,0 +1,39 @@
+body {
+  background-image: url("../imagens/homebackground.jpg");
+  background-size: cover;
+  position:fixed;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.explore-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 690px;
+    margin-top: 400px;
+}
+
+.explore-button a {
+    text-decoration: none;
+}
+
+.explore-button button {
+    padding: 10px 20px;
+    background-color:whitesmoke;
+    color:#2B7395;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    width: 120px;
+}
+
+.explore-button button:hover{
+    background-color: rgb(208, 208, 208);
+}
