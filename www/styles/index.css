@@ -14,6 +14,7 @@
   --margin-h3: 0.625em 0; 
   --padding-section: 1.25em; 
   --margin-bottom-receita: 1.25em; 
+  --padding-bottom-imagem: 2em; /* Additional padding at the bottom of images */
   --background-color-footer: #333;
   --text-align-footer: center;
   --padding-footer: 1.5em;
@@ -27,11 +28,25 @@ body {
 }
 
 header {
-  background-color: var(--background-color-header);
+  background-image: url("/www/imagens/background.nav.jpg");
+  background-size: cover;
   color: var(--text-color-header);
   padding: var(--padding-header);
   text-align: var(--text-align-header);
 }
+
+header button{
+  background-color: white;
+  border-color: #054FB4;
+  border-radius: 50%;
+}
+
+header button img {
+  max-width: 50%;
+  height: auto;
+  border-radius: 50%;
+}
+
 
 nav ul {
   list-style-type: none;
@@ -47,6 +62,17 @@ nav a {
   color: var(--color-link);
 }
 
+#inicio {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+#inicio img{
+  max-width: 100%;
+  height: auto;
+}
+
 #receitas {
   display: var(--display-receitas);
   flex-wrap: var(--flex-wrap-receitas);
@@ -56,6 +82,7 @@ nav a {
 .imagens {
   width: 30%;
   margin-bottom: var(--margin-imagem);
+  padding-bottom: var(--padding-bottom-imagem);
   text-align: center;
   position: relative;
 }
@@ -77,7 +104,6 @@ nav a {
 
 a {
   text-decoration: none;
-  
 }
 
 section {
