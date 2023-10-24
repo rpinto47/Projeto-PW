@@ -1,7 +1,7 @@
 :root {
   --font-size-base: 16px;
   --font-family: Arial, sans-serif;
-  --background-color-header: #333;
+  --background-color-header: #054FB4;
   --text-color-header: #fff;
   --padding-header: 1.5em;
   --text-align-header: center;
@@ -14,31 +14,63 @@
   --margin-h3: 0.625em 0; 
   --padding-section: 1.25em; 
   --margin-bottom-receita: 1.25em; 
-  --padding-bottom-imagem: 2em; /* Additional padding at the bottom of images */
-  --background-color-footer: #333;
+  --padding-bottom-imagem: 2em; 
+  --background-color-footer: #054FB4;
   --text-align-footer: center;
   --padding-footer: 1.5em;
+  --login-button-width: 7em; 
+  --login-button-height: 3.5em; 
 }
 
 body {
   font-size: var(--font-size-base);
   font-family: var(--font-family);
+  background-color: rgb(255, 255, 255);
   margin: 0;
   padding: 0;
 }
 
 header {
-  background-image: url("/www/imagens/background.nav.jpg");
+  background-color: var(--background-color-header);
   background-size: cover;
   color: var(--text-color-header);
   padding: var(--padding-header);
   text-align: var(--text-align-header);
 }
 
-header button{
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#logo-navbar {
   background-color: white;
-  border-color: #054FB4;
+  border-color: none;
   border-radius: 50%;
+}
+
+#logo-navbar:hover {
+  cursor: pointer;
+}
+
+#login-button {
+  width: var(--login-button-width);
+  height: var(--login-button-height);
+  border-radius: 8px;
+  border-color: #ffffff;
+  background-color: white
+}
+
+#login-button a {
+  color: #054FB4;
+}
+
+#login-button:hover{
+  background-color: #4292dc;
+  color: white;
+  border-color: none;
+  cursor: pointer;
 }
 
 header button img {
@@ -91,7 +123,12 @@ nav a {
   width: 100%;
   height: auto;
   display: block;
+  border-radius: 10%;
   aspect-ratio: 1;
+}
+
+.imagens img:hover {
+  filter: saturate(160%);
 }
 
 .imagens h3 {
@@ -104,6 +141,8 @@ nav a {
 
 a {
   text-decoration: none;
+  font-size: 1.125em; 
+  color: #054FB4;
 }
 
 section {
