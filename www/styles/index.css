@@ -1,7 +1,7 @@
 :root {
   --font-size-base: 16px;
   --font-family: Arial, sans-serif;
-  --background-color-header: #054FB4;
+  --background-color-header: #0344a0;
   --text-color-header: #fff;
   --padding-header: 1.5em;
   --text-align-header: center;
@@ -15,7 +15,7 @@
   --padding-section: 1.25em; 
   --margin-bottom-receita: 1.25em; 
   --padding-bottom-imagem: 2em; 
-  --background-color-footer: #054FB4;
+  --background-color-footer:#0344a0;
   --text-align-footer: center;
   --padding-footer: 1.5em;
   --login-button-width: 7em; 
@@ -46,7 +46,7 @@ nav {
 
 #logo-navbar {
   background-color: white;
-  border-color: none;
+  border-color: white;
   border-radius: 50%;
 }
 
@@ -128,7 +128,7 @@ nav a {
 }
 
 .imagens img:hover {
-  filter: saturate(160%);
+  filter: saturate(120%);
 }
 
 .imagens h3 {
@@ -142,7 +142,7 @@ nav a {
 a {
   text-decoration: none;
   font-size: 1.125em; 
-  color: #054FB4;
+  color: #0344a0;;
 }
 
 section {
