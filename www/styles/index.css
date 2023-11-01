@@ -1,7 +1,7 @@
 :root {
   --font-size-base: 16px;
   --font-family: Arial, sans-serif;
-  --background-color-header: #0344a0;
+  --background-color-header: #7f99c0;
   --text-color-header: #fff;
   --padding-header: 1.5em;
   --text-align-header: center;
@@ -15,7 +15,7 @@
   --padding-section: 1.25em; 
   --margin-bottom-receita: 1.25em; 
   --padding-bottom-imagem: 2em; 
-  --background-color-footer:#0344a0;
+  --background-color-footer:#0a459a;
   --text-align-footer: center;
   --padding-footer: 1.5em;
   --login-button-width: 7em; 
@@ -28,6 +28,9 @@ body {
   background-color: rgb(255, 255, 255);
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 header {
@@ -46,7 +49,7 @@ nav {
 
 #logo-navbar {
   background-color: white;
-  border-color: white;
+  border-color: #0a459a;
   border-radius: 50%;
 }
 
@@ -152,6 +155,7 @@ section {
 .receita {
   margin-bottom: var(--margin-bottom-receita);
 }
+
 
 footer {
   background-color: var(--background-color-footer);
