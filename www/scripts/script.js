@@ -14,32 +14,7 @@ class Products {
         this.quantity = parseInt(quantity);
         this.price = parseFloat(price);
     }
-
-    /**
-     * Converts the product to a table row element.
-     * @returns {HTMLTableRowElement} - The table row element representing the product.
-     */
-    toTr() {
-        const trElement = document.createElement("tr");
-        trElement.classList.add("selectable");
-
-        const tdName = document.createElement("td");
-        tdName.textContent = this.name;
-        trElement.appendChild(tdName);
-
-        const tdQuantity = document.createElement("td");
-        tdQuantity.textContent = this.quantity;
-        trElement.appendChild(tdQuantity);
-
-        const tdPrice = document.createElement("td");
-        tdPrice.textContent = this.price + " €";
-        trElement.appendChild(tdPrice);
-
-        return trElement;
-    }
 }
-
-
 
 /**
  * Represents a table order.
@@ -62,17 +37,15 @@ class TableOrder {
     createTableOrderElement() {
         const tableOrderDiv = document.createElement("div");
         tableOrderDiv.classList.add("tableOrder");
+        tableOrderDiv.id = "tableOrder";
 
-        // Create a navigation element
         const navElement = document.createElement("nav");
 
-        // Button for adding a product
         const addButton = document.createElement("button");
         addButton.textContent = "Add";
         addButton.addEventListener("click", () => this.addProduct());
         navElement.appendChild(addButton);
 
-        // Button for removing a product
         const removeButton = document.createElement("button");
         removeButton.textContent = "Remove";
         removeButton.addEventListener("click", () => this.removeProduct());
@@ -84,30 +57,10 @@ class TableOrder {
         tableOrderDiv.appendChild(navElement);
         tableOrderDiv.appendChild(productsDiv);
 
-        // Append tableOrderDiv to the DOM
         document.querySelector('.tableOrder').appendChild(tableOrderDiv);
 
         return tableOrderDiv;
     }
-
-
-
-
-    /**
-     * Creates a navigation link.
-     * @param {string} text - The text content of the link.
-     * @param {Table} table - The associated table.
-     * @param {string} functionName - The name of the function to be called on link click.
-     * @returns {HTMLAnchorElement} - The navigation link element.
-     */
-    createNavLink(text, table, functionName) {
-        const link = document.createElement("a");
-        link.classList.add("link");
-        link.href = `javascript: ${table}.${functionName}();`;
-        link.textContent = text;
-        return link;
-    }
-
 
     /**
      * Adds a product to the table order.
@@ -130,10 +83,105 @@ class TableOrder {
             productToRemove.parentNode.remove();
         }
     }
+
+    /**
+     * Closes the table order.
+     */
+    close() {
+        console.log('Closing table order');
+        const tableOrderDiv = document.getElementById('tableOrder');
+        if (tableOrderDiv) {
+            tableOrderDiv.style.display = 'none';
+        }
+    }
 }
 
+/**
+ * Represents a menu.
+ * @class
+ */
+class Menu {
+    constructor() {
+        this.products = [];
+    }
 
+    /**
+     * Adds a product to the menu.
+     * @param {Products} product - The product to be added.
+     */
+    addProduct(product) {
+        this.products.push(product);
+    }
 
+    /**
+     * Removes a product from the menu.
+     * @param {Products} product - The product to be removed.
+     */
+    removeProduct(product) {
+        this.products.splice(this.products.indexOf(product), 1);
+    }
+
+    /**
+     * Displays the menu.
+     */
+    displayMenu() {
+        const menuDiv = document.querySelector('.menu');
+        const menuTable = document.createElement("table");
+        menuTable.classList.add("menu-table");
+
+        const menuTableHead = document.createElement("thead");
+        const menuTableBody = document.createElement("tbody");
+
+        const headerRow = document.createElement("tr");
+        headerRow.classList.add("header-row");
+
+        const productNameHeader = document.createElement("th");
+        productNameHeader.textContent = "Product";
+        headerRow.appendChild(productNameHeader);
+
+        const productDescriptionHeader = document.createElement("th");
+        productDescriptionHeader.textContent = "Description";
+        headerRow.appendChild(productDescriptionHeader);
+
+        const productPriceHeader = document.createElement("th");
+        productPriceHeader.textContent = "Price";
+        headerRow.appendChild(productPriceHeader);
+
+        menuTableHead.appendChild(headerRow);
+
+        this.products.forEach(product => {
+            const productRow = document.createElement("tr");
+            productRow.classList.add("product-row", "selectable");
+
+            const tdName = document.createElement("td");
+            tdName.textContent = product.name;
+            productRow.appendChild(tdName);
+
+            const tdCategory = document.createElement("td");
+            tdCategory.textContent = product.category;
+            productRow.appendChild(tdCategory);
+
+            const tdPrice = document.createElement("td");
+            tdPrice.textContent = product.price + " €";
+            productRow.appendChild(tdPrice);
+
+            menuTableBody.appendChild(productRow);
+
+            tdName.className = "tdMenu";
+            tdCategory.className = "tdMenu";
+            tdPrice.className = "tdMenu";
+        });
+
+        productNameHeader.className = "menu-header";
+        productDescriptionHeader.className = "menu-header";
+        productPriceHeader.className = "menu-header";
+
+        menuTable.appendChild(menuTableHead);
+        menuTable.appendChild(menuTableBody);
+
+        menuDiv.appendChild(menuTable);
+    }
+}
 
 /**
  * Represents a table.
@@ -174,145 +222,124 @@ class Table {
 
         return tableElement;
     }
+
     /**
      * Shows the details of the table.
      */
     showDetails() {
-        // Remove 'selected' class from all table elements
+        const tableOrderDiv = document.querySelector('.tableOrder');
+        const isSelected = this.tableElement.classList.contains('selected');
+
         document.querySelectorAll('.table').forEach(tableElement => {
             tableElement.classList.remove('selected');
         });
 
-        // Add 'selected' class to the current table element
-        this.tableElement.classList.add('selected');
+        if (!isSelected) {
+            this.tableElement.classList.add('selected');
+            while (tableOrderDiv.firstChild) {
+                tableOrderDiv.removeChild(tableOrderDiv.firstChild);
+            }
 
-        // Select the tableOrder div
-        const tableOrderDiv = document.querySelector('.tableOrder');
+            if (this.tableOrder) {
+                const heading = document.createElement('h3');
+                heading.textContent = `Table ${this.number} Details`;
+                tableOrderDiv.appendChild(heading);
 
-        // Clear existing content in the tableOrder div
-        tableOrderDiv.innerHTML = '';
+                const table = document.createElement('table');
+                const headerRow = document.createElement('tr');
 
-        if (this.tableOrder) {
-            // Create heading for table details
-            const heading = document.createElement('h3');
-            heading.textContent = `Table ${this.number} Details`;
-            tableOrderDiv.appendChild(heading);
+                const productHeader = document.createElement('th');
+                productHeader.textContent = 'Product';
+                headerRow.appendChild(productHeader);
 
-            // Create table element and header row
-            const table = document.createElement('table');
-            const headerRow = document.createElement('tr');
+                const quantityHeader = document.createElement('th');
+                quantityHeader.textContent = 'Quantity';
+                headerRow.appendChild(quantityHeader);
 
-            // Create and append each table header cell
-            const productHeader = document.createElement('th');
-            productHeader.textContent = 'Product';
-            headerRow.appendChild(productHeader);
+                const priceHeader = document.createElement('th');
+                priceHeader.textContent = 'Price';
+                headerRow.appendChild(priceHeader);
 
-            const quantityHeader = document.createElement('th');
-            quantityHeader.textContent = 'Quantity';
-            headerRow.appendChild(quantityHeader);
+                table.appendChild(headerRow);
 
-            const priceHeader = document.createElement('th');
-            priceHeader.textContent = 'Price';
-            headerRow.appendChild(priceHeader);
+                this.products.forEach(product => {
+                    const row = document.createElement('tr');
 
-            table.appendChild(headerRow);
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = product.name;
+                    row.appendChild(nameCell);
 
-            // Iterate over products and create table rows
-            this.products.forEach(product => {
-                // Create a table row
-                const row = document.createElement('tr');
+                    const quantityCell = document.createElement('td');
+                    quantityCell.textContent = product.quantity;
+                    row.appendChild(quantityCell);
 
-                // Create and append the table data cells
-                const nameCell = document.createElement('td');
-                nameCell.textContent = product.name;
-                row.appendChild(nameCell);
+                    const priceCell = document.createElement('td');
+                    priceCell.textContent = `${product.price} €`;
+                    row.appendChild(priceCell);
 
-                const quantityCell = document.createElement('td');
-                quantityCell.textContent = product.quantity;
-                row.appendChild(quantityCell);
+                    table.appendChild(row);
+                });
 
-                const priceCell = document.createElement('td');
-                priceCell.textContent = `${product.price} €`;
-                row.appendChild(priceCell);
+                const buttonsRow = document.createElement('tr');
+                const addButtonCell = document.createElement('td');
+                const removeButtonCell = document.createElement('td');
+                const createButtonCell = document.createElement('td');
+                const closeButtonCell = document.createElement('td');
 
-                // Append the row to the table
-                table.appendChild(row);
-            });
+                const addButton = document.createElement("button");
+                addButton.textContent = "Add";
+                addButton.addEventListener("click", () => this.addProduct());
+                addButtonCell.appendChild(addButton);
 
-            // Create row for buttons
-            const buttonsRow = document.createElement('tr');
-            const addButtonCell = document.createElement('td');
-            const removeButtonCell = document.createElement('td');
-            const createButtonCell = document.createElement('td');
-            const closeButtonCell = document.createElement('td');
+                const removeButton = document.createElement("button");
+                removeButton.textContent = "Remove";
+                removeButton.addEventListener("click", () => this.removeProduct());
+                removeButtonCell.appendChild(removeButton);
 
-            // Button for adding a product
-            const addButton = document.createElement("button");
-            addButton.textContent = "Add";
-            addButton.addEventListener("click", () => this.addProduct());
-            addButtonCell.appendChild(addButton);
+                const createButton = document.createElement("button");
+                createButton.textContent = "Create";
+                createButton.addEventListener("click", () => this.removeProduct());
+                createButtonCell.appendChild(createButton);
 
-            // Button for removing a product
-            const removeButton = document.createElement("button");
-            removeButton.textContent = "Remove";
-            removeButton.addEventListener("click", () => this.removeProduct());
-            removeButtonCell.appendChild(removeButton);
+                const closeButton = document.createElement("button");
+                closeButton.textContent = "Close";
+                closeButton.addEventListener("click", () => this.close());
+                closeButtonCell.appendChild(closeButton);
 
-            // Button for creatin(?) a product
-            const createButton = document.createElement("button");
-            createButton.textContent = "Create";
-            createButton.addEventListener("click", () => this.removeProduct());
-            createButtonCell.appendChild(createButton);
+                buttonsRow.appendChild(addButtonCell);
+                buttonsRow.appendChild(removeButtonCell);
+                buttonsRow.appendChild(createButtonCell);
+                buttonsRow.appendChild(closeButtonCell);
 
-            // Button for creatin(?) a product
-            const closeButton = document.createElement("button");
-            closeButton.textContent = "Close";
-            closeButton.addEventListener("click", () => this.removeProduct());
-            closeButtonCell.appendChild(closeButton);
+                addButton.className = "tableOrderButton";
+                removeButton.className = "tableOrderButton";
+                createButton.className = "tableOrderButton";
+                closeButton.className = "tableOrderButton";
+                addButtonCell.className = "buttonCell";
+                removeButtonCell.className = "buttonCell";
+                createButtonCell.className = "buttonCell";
+                closeButtonCell.className = "buttonCell";
 
+                table.appendChild(buttonsRow);
+                tableOrderDiv.appendChild(table);
 
-            buttonsRow.appendChild(addButtonCell);
-            buttonsRow.appendChild(removeButtonCell);
-            buttonsRow.appendChild(createButtonCell);
-            buttonsRow.appendChild(closeButtonCell);
-            
+                const total = this.getTotal();
+                const totalParagraph = document.createElement('p');
+                totalParagraph.textContent = `Total: ${total} €`;
+                tableOrderDiv.appendChild(totalParagraph);
 
-            // Append buttons to the table
-            table.appendChild(buttonsRow);
-
-            // Add classes for styling
-            addButton.className = "tableOrderButton";
-            removeButton.className = "tableOrderButton";
-            createButton.className = "tableOrderButton";
-            closeButton.className = "tableOrderButton";
-            addButtonCell.className = "buttonCell";
-            removeButtonCell.className = "buttonCell";
-            createButtonCell.className = "buttonCell";
-            closeButtonCell.className = "buttonCell";
-
-            // Append the table to the tableOrder div
-            tableOrderDiv.appendChild(table);
-
-            // Create and append total paragraph
-            const total = this.getTotal();
-            const totalParagraph = document.createElement('p');
-            totalParagraph.textContent = `Total: ${total} €`;
-            tableOrderDiv.appendChild(totalParagraph);
-
-            // Display the tableOrder and orders
-            tableOrderDiv.style.display = 'block';
-            document.querySelector('.orders').style.display = 'block';
-        } else {
-            // Hide the tableOrderDiv and orders div when no table is selected
-            tableOrderDiv.style.display = 'none';
-            document.querySelector('.orders').style.display = 'none';
+                tableOrderDiv.style.display = 'block';
+            } else {
+                this.tableElement.classList.remove('selected');
+                tableOrderDiv.style.display = 'none';
+            }
         }
     }
 
     /**
      * Adds a product to the table.
      */
-    add() {
+    addProduct() {
         const productName = prompt("Enter the product name:");
         const quantity = parseInt(prompt("Enter the quantity:"));
         const price = parseFloat(prompt("Enter the price:"));
@@ -322,6 +349,7 @@ class Table {
             this.products.push(newProduct);
             this.showDetails();
             this.tableOrder.addProduct(newProduct);
+            this.displayProducts();
         } else {
             alert("Invalid input. Please enter valid values.");
         }
@@ -330,7 +358,7 @@ class Table {
     /**
      * Removes a product from the table.
      */
-    remove() {
+    removeProduct() {
         const productName = prompt("Enter the product name to remove:");
         const index = this.products.findIndex(product => product.name === productName);
 
@@ -342,16 +370,40 @@ class Table {
             alert("Product not found.");
         }
     }
+
+    /**
+    * Displays the list of products in the .products div.
+    */
+    displayProducts() {
+        const menuView = document.querySelector(".products");
+        menuView.textContent = '';
+
+        const heading = document.createElement('h3');
+        heading.textContent = "Products List";
+        menuView.appendChild(heading);
+
+        const productList = document.createElement('ul');
+
+        this.products.forEach(product => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${product.name} - Quantity: ${product.quantity}, Price: ${product.price} €`;
+            productList.appendChild(listItem);
+        });
+
+        menuView.appendChild(productList);
+    }
 }
 
-
-
+const tablesDiv = document.querySelector('.tables');
 
 const addButton = document.createElement('button');
 addButton.textContent = 'Add Tables';
 addButton.addEventListener('click', addTables);
 addButton.classList.add('add-tables-button');
-document.querySelector('.tables').appendChild(addButton);
+tablesDiv.appendChild(addButton);
+
+document.querySelector('.tableOrder').style.display = 'none';
+document.querySelector('.menu').style.display = 'none';
 
 /**
  * Adds tables to the document based on user input.
@@ -368,8 +420,41 @@ function addTables() {
             for (let i = 1; i <= parsedNumber; i++) {
                 new Table(i);
             }
+
+            document.querySelector('.tableOrder').style.display = 'block';
+            document.querySelector('.menu').style.display = 'block';
         } else {
             alert("Invalid input. Please enter a positive integer.");
         }
     }
+
+    const product1 = new Products("Product 1", 10, 5.99);
+    const product2 = new Products("Product 2", 8, 7.49);
+    const product3 = new Products("Product 3", 15, 3.99);
+
+    const menu = new Menu();
+
+    menu.addProduct(product1);
+    menu.addProduct(product2);
+    menu.addProduct(product3);
+
+    const product4 = new Products("Product 4", 12, 8.99);
+    const product5 = new Products("Product 5", 6, 12.49);
+    const product6 = new Products("Product 6", 20, 2.99);
+
+    const product7 = new Products("Product 7", 14, 6.99);
+    const product8 = new Products("Product 8", 5, 9.49);
+    const product9 = new Products("Product 9", 18, 4.99);
+
+    menu.addProduct(product1);
+    menu.addProduct(product2);
+    menu.addProduct(product3);
+    menu.addProduct(product4);
+    menu.addProduct(product5);
+    menu.addProduct(product6);
+    menu.addProduct(product7);
+    menu.addProduct(product8);
+    menu.addProduct(product9);
+
+    menu.displayMenu();
 }
