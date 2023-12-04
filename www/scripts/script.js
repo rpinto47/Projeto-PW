@@ -229,18 +229,17 @@ class Table {
     showDetails() {
         const tableOrderDiv = document.querySelector('.tableOrder');
         const isSelected = this.tableElement.classList.contains('selected');
-
+        console.log("isSelected", isSelected);
         document.querySelectorAll('.table').forEach(tableElement => {
             tableElement.classList.remove('selected');
         });
 
         if (!isSelected) {
             this.tableElement.classList.add('selected');
-            while (tableOrderDiv.firstChild) {
-                tableOrderDiv.removeChild(tableOrderDiv.firstChild);
-            }
+            tableOrderDiv.replaceChildren();
 
             if (this.tableOrder) {
+                console.log("Table order");
                 const heading = document.createElement('h3');
                 heading.textContent = `Table ${this.number} Details`;
                 tableOrderDiv.appendChild(heading);
@@ -323,16 +322,12 @@ class Table {
                 table.appendChild(buttonsRow);
                 tableOrderDiv.appendChild(table);
 
-                const total = this.getTotal();
-                const totalParagraph = document.createElement('p');
-                totalParagraph.textContent = `Total: ${total} €`;
-                tableOrderDiv.appendChild(totalParagraph);
-
                 tableOrderDiv.style.display = 'block';
-            } else {
-                this.tableElement.classList.remove('selected');
-                tableOrderDiv.style.display = 'none';
             }
+        } else {
+            console.log("NONE");
+            this.tableElement.classList.remove('selected');
+            tableOrderDiv.style.display = 'none';
         }
     }
 
@@ -415,8 +410,9 @@ function addTables() {
         const parsedNumber = parseInt(numberOfTables);
 
         if (!isNaN(parsedNumber) && parsedNumber > 0) {
-            document.querySelector('.tables').innerHTML = '';
-
+            document.querySelector('.tables');
+            addButton.style.display = 'none';
+            
             for (let i = 1; i <= parsedNumber; i++) {
                 new Table(i);
             }
