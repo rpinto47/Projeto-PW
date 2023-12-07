@@ -1,134 +1,241 @@
 :root {
-    --font-size: 16px;
+  --font-size: 16px;
 }
 
 body {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: flex-start;
-    margin: 0;
-    padding: 1.25em;
-    font-family: Arial, sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+  margin: 0;
+  padding: 1.25em;
+  font-family: Arial, sans-serif;
+}
+
+.nav-bar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex; /* Use flexbox to create a horizontal layout */
+}
+
+.nav-bar li {
+  margin-right: 15px; /* Adjust the spacing between menu items */
+}
+
+.nav-bar a {
+  text-decoration: none;
+  color: #000; /* Set the link color */
 }
 
 .tables,
 .tableOrder,
 .menu {
-    background-color: #f2f2f2;
-    margin: 1.25em;
-    padding: 1.25em;
-    border-radius: 0.625em;
-    box-sizing: border-box;
+  background-color: #f2f2f2;
+  margin: 1.25em;
+  padding: 1.25em;
+  border-radius: 0.625em;
+  box-sizing: border-box;
 }
 
 .tables {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    width: 60%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 60%;
 }
 
 .table {
-    width: calc(15% - 1.25em);
-    aspect-ratio: 1/1;
-    background-color: #ccc;
-    margin: 0.625em;
-    padding: 0.625em;
-    border-radius: 0.625em;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
+  width: calc(15% - 1.25em);
+  aspect-ratio: 1/1;
+  background-color: #ccc;
+  margin: 0.625em;
+  padding: 0.625em;
+  border-radius: 0.625em;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
 .add-tables-button {
-    border-radius: 1.25em;
-    cursor: pointer;
-    width: 100%;
-    font-size: 2em;
+  border-radius: 1.25em;
+  cursor: pointer;
+  width: 100%;
+  font-size: 2em;
 }
 
 .add-tables-button:hover {
-    background-color: lightblue;
-    color: #ff0000;
+  background-color: lightblue;
+  color: #ff0000;
 }
 
 .table.selected {
-    background-color: lightblue;
-    color: #ff0000;
+  background-color: lightblue;
+  color: #ff0000;
 }
 
 .container {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 .tableOrder {
-    background-color: #f0f0f0;
-    border: 0.0625em solid #ccc;
-    padding: 0.625em;
-    margin-top: 0.625em;
+  background-color: #f0f0f0;
+  border: 0.0625em solid #ccc;
+  padding: 0.625em;
+  margin-top: 0.625em;
 }
 
 .tableOrder h3 {
-    color: #ff0000;
+  color: #ff0000;
 }
 
 .tableOrder table {
-    width: 100%;
-    margin-top: 0.625em;
+  width: 100%;
+  margin-top: 0.625em;
 }
 
 .tableOrder th,
 .tableOrder td {
-    border-left: 0.3125em solid transparent;
-    border-right: 0.3125em solid transparent;
+  border-left: 0.3125em solid transparent;
+  border-right: 0.3125em solid transparent;
 }
 
 .tableOrder th {
-    padding: 0.625em;
-    text-align: left;
-    background-color: lightblue;
+  padding: 0.625em;
+  text-align: left;
+  background-color: lightblue;
 }
 
 .tableOrder p {
-    margin-top: 0.625em;
+  margin-top: 0.625em;
 }
 
 .tableOrderButton {
-    width: 5.625em;
-    height: 2.8125em;
-    border-radius: 8%;
-    background-color: lightblue;
-    color: #ff0000;
-    cursor: pointer;
-    align-items: center;
+  width: 5.625em;
+  height: 2.8125em;
+  border-radius: 8%;
+  background-color: lightblue;
+  color: #ff0000;
+  cursor: pointer;
+  align-items: center;
 }
 
 .tableOrderButton:hover {
-    background-color: rgb(144, 202, 222);
-    color: #ff0000;
+  background-color: rgb(144, 202, 222);
+  color: #ff0000;
 }
 
 .buttonCell {
-    background-color: transparent;
-    text-align: center;
-    width: 6.25em;
-    height: 3.75em;
+  background-color: transparent;
+  text-align: center;
+  width: 6.25em;
+  height: 3.75em;
 }
 
 .menu {
-    width: 100%; /* Make it 100% width to be responsive */
-    max-width: 20em; /* Add a maximum width to avoid excessive stretching on large screens */
+  width: 100%; /* Make it 100% width to be responsive */
+  max-width: 20em; /* Add a maximum width to avoid excessive stretching on large screens */
 }
 
 .menu-header {
-    background-color: lightblue;
-    padding: 0.625em;
+  background-color: lightblue;
+  padding: 0.625em;
 }
 
 .tdMenu {
-    border-left: 0.3125em solid transparent;
-    border-right: 0.3125em solid transparent;
-    padding: 0.25em;
+  border-left: 0.3125em solid transparent;
+  border-right: 0.3125em solid transparent;
+  padding: 0.25em;
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu-select {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.menu-select:hover {
+  cursor: pointer;
+}
+
+.menu-select:focus {
+  outline: none;
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 1);
+}
+
+.menu-container {
+  text-align: center;
+}
+
+.menu-table {
+  width: 100%;
+}
+
+.menu-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px; /* Add margin between rows if needed */
+}
+
+.menu-cell {
+  padding: 10px;
+  text-align: center;
+  background-color: #ff0000;
+}
+
+.menu-select {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.menu-select:hover {
+  cursor: pointer;
+}
+
+.menu-select:focus {
+  outline: none;
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 1);
+}
+
+.menu-input {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 50px; /* Adjust width as needed */
+}
+
+.menu-input:hover {
+  cursor: pointer;
+}
+
+.menu-input:focus {
+  outline: none;
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 1);
+}
+
+.menu-buttons {
+  margin: 0.625em;
+  width: 5.625em;
+  height: 2.8125em;
+  border-radius: 8%;
+  background-color: lightblue;
+  color: #ff0000;
+  cursor: pointer;
+  align-items: center;
 }
