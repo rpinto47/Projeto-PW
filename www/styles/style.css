@@ -184,13 +184,12 @@ body {
 .menu-row {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px; /* Add margin between rows if needed */
+  margin-bottom: 5px;
 }
 
 .menu-cell {
   padding: 10px;
   text-align: center;
-  background-color: #ff0000;
 }
 
 .menu-select {
@@ -204,6 +203,8 @@ body {
 .menu-select:hover {
   cursor: pointer;
 }
+
+
 
 .menu-select:focus {
   outline: none;
@@ -238,4 +239,9 @@ body {
   color: #ff0000;
   cursor: pointer;
   align-items: center;
+}
+
+.menu-buttons:hover {
+  background-color: rgb(144, 202, 222);
+  color: #ff0000;
 }
