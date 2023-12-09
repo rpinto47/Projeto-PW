@@ -126,6 +126,21 @@ body {
   color: #ff0000;
 }
 
+/* Add a background color when a row is selected */
+.product-row.selected {
+  background-color: #d4e6fa; /* Light blue color, you can change this as needed */
+}
+
+/* Change text color for selected rows */
+.product-row.selected td {
+  color: #004085; /* Dark blue color, you can change this as needed */
+}
+
+/* Add a pointer cursor to indicate clickable rows */
+.product-row.selectable {
+  cursor: pointer;
+}
+
 .buttonCell {
   background-color: transparent;
   text-align: center;

@@ -7,7 +7,6 @@ class Enumerate {
      * @param {...string} values - The values to include in the enumeration.
      */
     constructor(...values) {
-        // Use Object.fromEntries for a more concise code
         this.enumeration = Object.freeze(Object.fromEntries(values.map(value => [value, value])));
     }
 
@@ -28,15 +27,15 @@ class Enumerate {
         return this.values.includes(value);
     }
 }
-const ProductTypes = new Enumerate('Entradas', 'Prato Principal', 'Sobremesa', 'Bebida');
 
+const ProductTypes = new Enumerate('Entradas', 'Prato Principal', 'Sobremesa', 'Bebida');
 
 /**
  * Represents a product with name, quantity, price, and product type.
  */
-class Products {
+class Product {
     /**
-     * Creates a new Products instance.
+     * Creates a new Product instance.
      * @param {string} name - The name of the product.
      * @param {number} quantity - The quantity of the product.
      * @param {number} price - The price of the product.
@@ -47,19 +46,41 @@ class Products {
         this.quantity = parseInt(quantity);
         this.price = parseFloat(price);
 
-        // Validate and set the product type
         if (!ProductTypes.isValid(productType)) {
             throw new Error(`Invalid product type: ${productType}`);
         } else {
             this.productType = productType;
         }
     }
+
+    /**
+     * Converts the product to a table row element.
+     * @returns {HTMLTableRowElement} The created table row element.
+     */
+    toTr() {
+        const tr = document.createElement('tr');
+
+        const properties = ['name', 'quantity', 'price'];
+
+        properties.forEach(propertyName => {
+            const td = document.createElement('td');
+            td.textContent = propertyName === 'price' ? `${this[propertyName]} €` : this[propertyName];
+            tr.appendChild(td);
+        });
+
+        const hiddenIdCell = document.createElement('td');
+        hiddenIdCell.style.display = 'none';
+        hiddenIdCell.textContent = `${this.name}-${this.productType}`;
+        tr.appendChild(hiddenIdCell);
+
+        return tr;
+    }
+
 }
 
-
 /**
- * Represents a Table Order associated with a specific table.
- */
+* Represents a Table Order associated with a specific table.
+*/
 class TableOrder {
     /**
      * Creates a new TableOrder instance.
@@ -67,6 +88,7 @@ class TableOrder {
      */
     constructor(table) {
         this.table = table;
+        this.products = [];
         this.tableOrderElement = this.createTableOrderElement();
     }
 
@@ -120,27 +142,7 @@ class TableOrder {
         return button;
     }
 
-    /**
-     * Adds a product to the table order.
-     * @param {Product} product - The product to be added.
-     */
-    addProduct(product) {
-        const productsDiv = this.tableOrderElement.querySelector('#products');
-        productsDiv.appendChild(product.toTr());
-    }
 
-    /**
-     * Removes a product from the table order.
-     * @param {string} productName - The name of the product to be removed.
-     */
-    removeProduct(productName) {
-        const productsDiv = this.tableOrderElement.querySelector('#products');
-        const productToRemove = productsDiv.querySelector(`td:first-child:contains(${productName})`);
-
-        if (productToRemove) {
-            productToRemove.parentNode.remove();
-        }
-    }
 
     /**
      * Checks if the table order is currently displayed.
@@ -163,9 +165,10 @@ class TableOrder {
     }
 }
 
+
 /**
  * Represents a menu with product-related functionalities.
- */
+*/
 class Menu {
     /**
      * Creates a new Menu instance.
@@ -173,6 +176,14 @@ class Menu {
     constructor() {
         this.products = [];
         this.menuDisplayed = false;
+    }
+
+    /**
+     * Sets the selected table.
+     * @param {Table} table - The selected table.
+     */
+    setSelectedTable(table) {
+        this.selectedTable = table;
     }
 
     /**
@@ -311,9 +322,9 @@ class Menu {
     }
 
     /**
-     * Creates a select element for choosing a product.
-     * @returns {HTMLSelectElement} The created select element.
-     */
+  * Creates a select element for choosing a product.
+  * @returns {HTMLSelectElement} The created select element.
+  */
     createMenuSelect() {
         const menuSelect = document.createElement('select');
         menuSelect.classList.add('menu-select');
@@ -338,13 +349,11 @@ class Menu {
     }
 
     /**
-     * Creates a row for inputting product quantity.
-     * @returns {HTMLTableRowElement} The created table row element.
-     */
+  * Creates a row for inputting product quantity.
+  * @returns {HTMLTableRowElement} The created table row element.
+  */
     createQuantityRow() {
         const quantityRow = this.createMenuRow();
-        quantityRow.style.display = 'flex';
-        quantityRow.style.justifyContent = 'center';
 
         const quantityTextCell = this.createMenuCell('Quantity');
         const quantitySelectCell = this.createMenuCell();
@@ -369,14 +378,24 @@ class Menu {
         return quantityInput;
     }
 
+
     /**
-     * Creates a row containing buttons for saving and canceling.
-     * @returns {HTMLTableRowElement} The created table row element.
+     * Creates a row containing buttons (e.g., Save and Cancel) for the menu.
+     * @returns {HTMLTableRowElement} The created table row containing buttons.
      */
     createButtonsRow() {
         const buttonsRow = this.createMenuRow();
 
-        const saveButton = this.createButton('Save');
+        /**
+         * Click handler for the Save button. Calls the saveProduct method.
+         * @type {Function}
+         */
+        const saveButton = this.createButton('Save', () => this.saveProduct());
+
+        /**
+         * Click handler for the Cancel button. Calls the closeMenu method.
+         * @type {Function}
+         */
         const cancelButton = this.createButton('Cancel', () => this.closeMenu());
 
         const saveButtonCell = this.createMenuCell();
@@ -390,6 +409,28 @@ class Menu {
 
         return buttonsRow;
     }
+
+
+    /**
+    * Saves the selected product to the table.
+    */
+    saveProduct() {
+        const selectedProduct = this.getSelectedProduct();
+        const selectedQuantity = this.getSelectedQuantity();
+
+        if (selectedProduct && selectedQuantity !== null) {
+            if (this.selectedTable && typeof this.selectedTable.addProduct === 'function') {
+                // Add the selected product to the selected table
+                this.selectedTable.addProduct(selectedProduct, selectedQuantity);
+            } else {
+                console.error('Selected table is invalid or does not have the addProduct method.');
+                alert('No table selected or invalid table.');
+            }
+        } else {
+            alert('Invalid input. Please select a product and enter a valid quantity.');
+        }
+    }
+
 
     /**
      * Creates a button element.
@@ -406,9 +447,44 @@ class Menu {
         button.classList.add('menu-buttons');
         return button;
     }
+
+
+    /**
+     * Gets the selected product from the menu.
+     * @returns {Product|null} The selected product, or null if no product is selected.
+     */
+    getSelectedProduct() {
+        const menuSelect = document.querySelector('.menu-select');
+        const selectedProductName = menuSelect ? menuSelect.value : null;
+
+        if (selectedProductName) {
+            // Find the selected product in the products array
+            return this.products.find(product => product.name === selectedProductName) || null;
+        }
+
+        return null;
+    }
+
+
+    /**
+    * Gets the selected quantity from the menu.
+    * @returns {number|null} The selected quantity, or null if no quantity is selected.
+    */
+    getSelectedQuantity() {
+        const quantityInput = document.querySelector('.menu-cell input');
+        const selectedQuantity = quantityInput ? parseInt(quantityInput.value, 10) : null;
+
+        if (!isNaN(selectedQuantity) && selectedQuantity > 0) {
+            return selectedQuantity;
+        }
+
+        return null;
+    }
+
 }
 
 const menu = new Menu();
+
 
 /**
  * Represents a table with associated products and order details.
@@ -471,8 +547,9 @@ class Table {
      * @param {Product} product - The product to be displayed.
      * @returns {HTMLTableRowElement} The created table row.
      */
-    createProductRow(product) {
+    createProductRow(product, index) {
         const row = document.createElement('tr');
+        row.dataset.index = index; // Set the index as a data attribute
         row.classList.add('product-row', 'selectable');
 
         ['name', 'quantity', 'price'].forEach(propertyName => {
@@ -483,8 +560,31 @@ class Table {
             row.appendChild(cell);
         });
 
+        row.addEventListener('click', () => this.selectProductRow(row)); // Add click event listener
+
         return row;
     }
+
+    /**
+     * Selects a product row in the table and deselects any previously selected row.
+     * @param {HTMLTableRowElement} row - The clicked table row to be selected.
+     */
+    selectProductRow(row) {
+        /**
+         * The currently selected row in the product table.
+         * @type {HTMLTableRowElement|null}
+         */
+        const selectedRow = document.querySelector('.product-row.selected');
+
+        if (selectedRow) {
+            selectedRow.classList.remove('selected');
+        }
+
+
+        row.classList.add('selected');
+    }
+
+
 
     /**
      * Creates a button element.
@@ -499,9 +599,10 @@ class Table {
         return button;
     }
 
+
     /**
- * Displays the details of the table, including products and order information.
- */
+    * Displays the details of the table, including products and order information.
+    */
     showDetails() {
         const tableOrderDiv = document.querySelector('.tableOrder');
         const isSelected = this.tableElement.classList.contains('selected');
@@ -512,27 +613,47 @@ class Table {
 
         if (!isSelected) {
             this.tableElement.classList.add('selected');
-            tableOrderDiv.replaceChildren();
+            this.updateDetailsWithoutClosing();
+        } else {
+            this.tableElement.classList.remove('selected');
+            tableOrderDiv.style.display = "none";
+            menu.setSelectedTable(null);
+            if (menu.isDisplayed()) {
+                menu.closeMenu();
+            }
+        }
+    }
 
-            if (this.tableOrder) {
-                const heading = document.createElement('h3');
-                heading.textContent = `Table ${this.number} Details`;
-                heading.style.textAlign = 'center';
-                tableOrderDiv.appendChild(heading);
 
-                const table = document.createElement('table');
-                table.appendChild(this.createTableHeader());
+    /**
+    * Updates the details of the table without closing the divs.
+    */
+    updateDetailsWithoutClosing() {
+        const tableOrderDiv = document.querySelector('.tableOrder');
 
-                this.products.forEach(product => {
-                    table.appendChild(this.createProductRow(product));
-                });
+        tableOrderDiv.replaceChildren();
+        menu.setSelectedTable(this);
 
-                const buttonsRow = document.createElement('tr');
-                ['Create', 'Remove', 'Edit', 'Close'].forEach(buttonText => {
-                    const buttonCell = document.createElement('td');
-                    const clickHandler = buttonText === 'Create' ? () => menu.displayMenu() :
-                        buttonText === 'Remove' ? () => this.removeProduct() :
-                            buttonText === 'Edit' ? () => this.editProduct() :
+        if (this.tableOrder) {
+            const heading = document.createElement('h3');
+            heading.textContent = `Table ${this.number} Details`;
+            heading.style.textAlign = 'center';
+            tableOrderDiv.appendChild(heading);
+
+            const table = document.createElement('table');
+            table.appendChild(this.createTableHeader());
+
+            this.products.forEach(product => {
+                table.appendChild(this.createProductRow(product));
+            });
+
+            const buttonsRow = document.createElement('tr');
+            ['Create', 'Remove', 'Edit', 'Close Order'].forEach(buttonText => {
+                const buttonCell = document.createElement('td');
+                const clickHandler = buttonText === 'Create' ? () => menu.displayMenu() :
+                    buttonText === 'Remove' ? () => this.removeProduct() :
+                        buttonText === 'Edit' ? () => this.editProduct() :
+                            buttonText === 'Close Order' ? () => this.closeOrder() :
                                 () => {
                                     tableOrderDiv.replaceChildren();
                                     this.tableElement.classList.remove('selected');
@@ -543,70 +664,93 @@ class Table {
                                     }
                                 };
 
-                    const button = this.createButton(buttonText, clickHandler);
-                    buttonCell.appendChild(button);
-                    buttonsRow.appendChild(buttonCell);
-                });
+                const button = this.createButton(buttonText, clickHandler);
+                buttonCell.appendChild(button);
+                buttonsRow.appendChild(buttonCell);
+            });
 
-                buttonsRow.querySelectorAll('button').forEach(button => {
-                    button.className = 'tableOrderButton';
-                });
+            buttonsRow.querySelectorAll('button').forEach(button => {
+                button.className = 'tableOrderButton';
+            });
 
-                buttonsRow.querySelectorAll('td').forEach(cell => {
-                    cell.className = 'buttonCell';
-                });
+            buttonsRow.querySelectorAll('td').forEach(cell => {
+                cell.className = 'buttonCell';
+            });
 
-                table.appendChild(buttonsRow);
-                tableOrderDiv.appendChild(table);
-                tableOrderDiv.style.display = 'block';
-            }
-        } else {
-            this.tableElement.classList.remove('selected');
-            tableOrderDiv.style.display = 'none';
-            if (menu.isDisplayed()) {
-                menu.closeMenu();
-            }
+            table.appendChild(buttonsRow);
+            tableOrderDiv.appendChild(table);
+            tableOrderDiv.style.display = 'block';
         }
     }
 
-    /**
-     * Adds a new product to the table.
-     */
-    addProduct() {
-        const productName = prompt('Enter the product name:');
-        const quantity = parseInt(prompt('Enter the quantity:'));
-        const price = parseFloat(prompt('Enter the price:'));
 
-        if (productName && !isNaN(quantity) && !isNaN(price)) {
-            const newProduct = new Products(productName, quantity, price);
-            this.products.push(newProduct);
-            this.showDetails();
-            this.tableOrder.addProduct(newProduct);
-            this.displayProducts();
-        } else {
-            alert('Invalid input. Please enter valid values.');
+    /**
+    * Adds a product to the table.
+    * @param {Product} product - The product to be added.
+    * @param {number} quantity - The quantity of the product to be added.
+    */
+    addProduct(product, quantity) {
+        let productExists = false;
+
+        for (const existingProduct of this.products) {
+            if (existingProduct.name === product.name) {
+                productExists = true;
+
+
+                existingProduct.quantity += quantity;
+
+
+                existingProduct.price = existingProduct.quantity * product.price;
+
+
+                console.log('Updated existing product in the table:', existingProduct);
+
+                break;
+            }
         }
+
+        if (!productExists) {
+
+            this.products.push({ name: product.name, quantity, price: quantity * product.price });
+
+            console.log('Added new product to the table:', { name: product.name, quantity, price: quantity * product.price });
+        }
+
+        // Update the UI to reflect the changes
+        this.updateDetailsWithoutClosing();
     }
 
+
+
     /**
-     * Removes a product from the table based on user input.
-     */
+    * Removes a product from the table based on user input.
+    */
     removeProduct() {
-        const productName = prompt('Enter the product name to remove:');
-        const index = this.products.findIndex(product => product.name === productName);
+        const selectedRow = document.querySelector('.product-row.selected');
 
-        if (index !== -1) {
-            this.products.splice(index, 1);
-            this.showDetails();
-            this.tableOrder.removeProduct(productName);
-        } else {
-            alert('Product not found.');
+        if (selectedRow) {
+            const selectedIndex = selectedRow.dataset.index;
+
+            this.products.splice(selectedIndex, 1);
+
+            this.updateDetailsWithoutClosing();
         }
+    }
+
+
+
+
+    /**
+     * Deletes all products from the table order.
+     */
+    closeOrder() {
+        this.products = [];
+        this.updateDetailsWithoutClosing();
     }
 
     /**
      * Displays the list of products in a separate view.
-     */
+    */
     displayProducts() {
         const menuView = document.querySelector('.products');
         menuView.textContent = '';
@@ -662,12 +806,12 @@ function addTables() {
 
 
 
-const product1 = new Products("Caesar Salad", 1, 8.99, "Entradas");
-const product2 = new Products("Margherita Pizza", 1, 12.99, "Prato Principal");
-const product3 = new Products("Chocolate Brownie", 1, 5.99, "Sobremesa");
-const product4 = new Products("Coca-Cola", 1, 2.49, "Bebida");
-const product5 = new Products("Grilled Chicken Sandwich", 1, 9.99, "Prato Principal");
-const product6 = new Products("Apple Pie", 1, 6.99, "Sobremesa");
+const product1 = new Product("Caesar Salad", 1, 8.99, "Entradas");
+const product2 = new Product("Margherita Pizza", 1, 12.99, "Prato Principal");
+const product3 = new Product("Chocolate Brownie", 1, 5.99, "Sobremesa");
+const product4 = new Product("Coca-Cola", 1, 2.49, "Bebida");
+const product5 = new Product("Grilled Chicken Sandwich", 1, 9.99, "Prato Principal");
+const product6 = new Product("Apple Pie", 1, 6.99, "Sobremesa");
 
 menu.addProduct(product1);
 menu.addProduct(product2);
