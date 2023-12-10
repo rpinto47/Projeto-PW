@@ -2,27 +2,20 @@
  * Enumerate class for creating enums.
  */
 class Enumerate {
-    /**
-     * Creates an enumeration with the provided values.
-     * @param {...string} values - The values to include in the enumeration.
-     */
     constructor(...values) {
-        this.enumeration = Object.freeze(Object.fromEntries(values.map(value => [value, value])));
+        const uniqueValues = [...new Set(values)];
+
+        if (uniqueValues.length !== values.length) {
+            throw new Error('Duplicate values are not allowed in the enumeration.');
+        }
+
+        this.enumeration = Object.freeze(Object.fromEntries(uniqueValues.map(value => [value, value])));
     }
 
-    /**
-     * Gets an array of all values in the enumeration.
-     * @returns {string[]} An array of enumeration values.
-     */
     get values() {
         return Object.values(this.enumeration);
     }
 
-    /**
-     * Checks if a given value is valid within the enumeration.
-     * @param {string} value - The value to check for validity.
-     * @returns {boolean} True if the value is valid, false otherwise.
-     */
     isValid(value) {
         return this.values.includes(value);
     }
@@ -250,7 +243,7 @@ class Menu {
         const heading = document.createElement('h3');
         heading.textContent = 'Products List';
 
-        const menuTable = this.createMenuTable();
+        const menuTable = this.createMenuTableWithInputs();
         const buttonsRow = this.createButtonsRow();
 
         menuContainer.appendChild(heading);
@@ -268,12 +261,23 @@ class Menu {
      * Creates the table element for the menu.
      * @returns {HTMLTableElement} The created table element.
      */
-    createMenuTable() {
+    createMenuTableWithInputs() {
         const menuTable = document.createElement('table');
         menuTable.style.width = '100%';
 
         menuTable.appendChild(this.createSelectProductRow());
         menuTable.appendChild(this.createQuantityRow());
+
+        return menuTable;
+    }
+
+    /**
+     * Creates the table element for the menu.
+     * @returns {HTMLTableElement} The created table element.
+     */
+    createMenuTableWithoutInputs() {
+        const menuTable = document.createElement('table');
+        menuTable.style.width = '100%';
 
         return menuTable;
     }
@@ -322,9 +326,9 @@ class Menu {
     }
 
     /**
-  * Creates a select element for choosing a product.
-  * @returns {HTMLSelectElement} The created select element.
-  */
+    * Creates a select element for choosing a product.
+    * @returns {HTMLSelectElement} The created select element.
+    */
     createMenuSelect() {
         const menuSelect = document.createElement('select');
         menuSelect.classList.add('menu-select');
@@ -349,9 +353,9 @@ class Menu {
     }
 
     /**
-  * Creates a row for inputting product quantity.
-  * @returns {HTMLTableRowElement} The created table row element.
-  */
+    * Creates a row for inputting product quantity.
+    * @returns {HTMLTableRowElement} The created table row element.
+    */
     createQuantityRow() {
         const quantityRow = this.createMenuRow();
 
@@ -481,6 +485,58 @@ class Menu {
         return null;
     }
 
+    /**
+  * Displays the menu in a table format.
+  */
+    displayMenuTable() {
+        const menuTable = this.createMenuTableWithoutInputs();
+
+        // Add header row
+        const headerRow = document.createElement('tr');
+        ['Product', 'Description', 'Price'].forEach(headerText => {
+            const header = document.createElement('th');
+            header.textContent = headerText;
+            headerRow.appendChild(header);
+        });
+        menuTable.appendChild(headerRow);
+
+        // Order products by product type
+        const orderedProducts = this.orderProductsByProductType();
+
+        // Add rows for each product
+        orderedProducts.forEach(product => {
+            const row = document.createElement('tr');
+            ['name', 'productType', 'price'].forEach(propertyName => {
+                const cell = document.createElement('td');
+                const cellContent = propertyName === 'price' ? `${product[propertyName]} €` : product[propertyName];
+                cell.textContent = cellContent;
+                row.appendChild(cell);
+            });
+            menuTable.appendChild(row);
+        });
+
+        // Display the table
+        const menuTableContainer = document.querySelector('.menu-table-container');
+        menuTableContainer.replaceChildren(menuTable);
+    }
+
+    /**
+     * Orders products by product type in the specified order.
+     * @returns {Array} The ordered array of products.
+     */
+    orderProductsByProductType() {
+        const productTypeOrder = ['Entradas', 'Prato Principal', 'Bebida', 'Sobremesa'];
+        return this.products.sort((a, b) => {
+            const typeA = productTypeOrder.indexOf(a.productType);
+            const typeB = productTypeOrder.indexOf(b.productType);
+            return typeA - typeB;
+        });
+    }
+
+
+
+
+
 }
 
 const menu = new Menu();
@@ -512,6 +568,7 @@ class Table {
         }
     }
 
+
     /**
      * Creates the HTML element for the table.
      * @returns {HTMLDivElement} The created table element.
@@ -524,6 +581,7 @@ class Table {
         document.querySelector('.tables').appendChild(tableElement);
         return tableElement;
     }
+
 
     /**
      * Creates the header row for the product table.
@@ -577,13 +635,17 @@ class Table {
         const selectedRow = document.querySelector('.product-row.selected');
 
         if (selectedRow) {
-            selectedRow.classList.remove('selected');
+
+            if (selectedRow === row) {
+                selectedRow.classList.remove('selected');
+            } else {
+                selectedRow.classList.remove('selected');
+                row.classList.add('selected');
+            }
+        } else {
+            row.classList.add('selected');
         }
-
-
-        row.classList.add('selected');
     }
-
 
 
     /**
@@ -646,6 +708,21 @@ class Table {
             this.products.forEach(product => {
                 table.appendChild(this.createProductRow(product));
             });
+
+            // Add a row for the total
+            const totalRow = document.createElement('tr');
+            totalRow.classList.add('product-row', 'selectable');
+
+            const totalCell = document.createElement('td');
+            totalCell.textContent = 'Total';
+            totalCell.colSpan = 2; // Span two columns for 'Product' and 'Quantity'
+            totalRow.appendChild(totalCell);
+
+            const totalAmountCell = document.createElement('td');
+            totalAmountCell.textContent = `${this.calculateTotal()} €`;
+            totalRow.appendChild(totalAmountCell);
+
+            table.appendChild(totalRow);
 
             const buttonsRow = document.createElement('tr');
             ['Create', 'Remove', 'Edit', 'Close Order'].forEach(buttonText => {
@@ -748,6 +825,17 @@ class Table {
         this.updateDetailsWithoutClosing();
     }
 
+
+    /**
+     * Calculates the total price of all products in the table.
+     *
+     * @returns {string} The total price formatted with two decimal places.
+     */
+    calculateTotal() {
+        return this.products.reduce((total, product) => total + product.price, 0).toFixed(2);
+    }
+
+
     /**
      * Displays the list of products in a separate view.
     */
@@ -807,11 +895,24 @@ function addTables() {
 
 
 const product1 = new Product("Caesar Salad", 1, 8.99, "Entradas");
-const product2 = new Product("Margherita Pizza", 1, 12.99, "Prato Principal");
-const product3 = new Product("Chocolate Brownie", 1, 5.99, "Sobremesa");
-const product4 = new Product("Coca-Cola", 1, 2.49, "Bebida");
-const product5 = new Product("Grilled Chicken Sandwich", 1, 9.99, "Prato Principal");
-const product6 = new Product("Apple Pie", 1, 6.99, "Sobremesa");
+const product2 = new Product("Caprese Salad", 1, 9.99, "Entradas");
+const product3 = new Product("Bruschetta", 1, 7.49, "Entradas");
+
+const product4 = new Product("Margherita Pizza", 1, 12.99, "Prato Principal");
+const product5 = new Product("Penne alla Vodka", 1, 10.99, "Prato Principal");
+const product6 = new Product("Grilled Chicken Sandwich", 1, 9.99, "Prato Principal");
+
+const product7 = new Product("Chocolate Brownie", 1, 5.99, "Sobremesa");
+const product8 = new Product("Tiramisu", 1, 7.99, "Sobremesa");
+const product9 = new Product("Cheesecake", 1, 8.49, "Sobremesa");
+
+const product10 = new Product("Coca-Cola", 1, 2.49, "Bebida");
+const product11 = new Product("Orange Juice", 1, 3.29, "Bebida");
+const product12 = new Product("Iced Tea", 1, 2.99, "Bebida");
+
+const product13 = new Product("Chicken Alfredo", 1, 11.99, "Prato Principal");
+const product14 = new Product("Mango Sorbet", 1, 4.99, "Sobremesa");
+const product15 = new Product("Minestrone Soup", 1, 6.49, "Entradas");
 
 menu.addProduct(product1);
 menu.addProduct(product2);
@@ -819,3 +920,67 @@ menu.addProduct(product3);
 menu.addProduct(product4);
 menu.addProduct(product5);
 menu.addProduct(product6);
+menu.addProduct(product7);
+menu.addProduct(product8);
+menu.addProduct(product9);
+menu.addProduct(product10);
+menu.addProduct(product11);
+menu.addProduct(product12);
+menu.addProduct(product13);
+menu.addProduct(product14);
+menu.addProduct(product15);
+
+
+
+// Add event listeners to buttons
+document.getElementById('tablesButton').addEventListener('click', showTables);
+document.getElementById('menuButton').addEventListener('click', showMenu);
+document.getElementById('productTypesButton').addEventListener('click', showProductTypes);
+
+// Functions
+function showTables() {
+    document.querySelector(".tableOrder").style.display = "none";
+    document.querySelector(".menu").style.display = "none";
+}
+
+
+
+
+function showMenu() {
+    // Hide other elements
+    document.querySelector(".tableOrder").style.display = "none";
+    document.querySelector(".tables").style.display = "none";
+
+    // Get the menu container
+    const menuContainer = document.querySelector(".menu-container");
+
+    // Clear existing content in the menu container
+    while (menuContainer.firstChild) {
+        menuContainer.removeChild(menuContainer.firstChild);
+    }
+
+    // Display the menu in table format
+    menu.displayMenuTable();
+
+    // Append the menu table to the menu container
+    menuContainer.appendChild(document.querySelector('.menu-table-container'));
+
+    // Create "Add Product" button
+    const addProductButton = document.createElement("button");
+    addProductButton.textContent = "Add Product";
+    addProductButton.className = "nav-to-menu-buttons"; // Add the class name
+    addProductButton.addEventListener("click", () => addProduct()); // Add click event
+
+    // Create "Remove Product" button
+    const removeProductButton = document.createElement("button");
+    removeProductButton.textContent = "Remove Product";
+    removeProductButton.className = "nav-to-menu-buttons"; // Add the class name
+    removeProductButton.addEventListener("click", () => removeProduct()); // Add click event
+
+    // Append buttons to the menu container
+    menuContainer.appendChild(addProductButton);
+    menuContainer.appendChild(removeProductButton);
+
+    // Set the menu container to be visible
+    menuContainer.style.display = "block";
+}
