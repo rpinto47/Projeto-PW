@@ -242,6 +242,7 @@ class Menu {
 
         const heading = document.createElement('h3');
         heading.textContent = 'Products List';
+        heading.style.color = '#ff0000';
 
         const menuTable = this.createMenuTableWithInputs();
         const buttonsRow = this.createButtonsRow();
@@ -485,40 +486,7 @@ class Menu {
         return null;
     }
 
-    /**
-  * Displays the menu in a table format.
-  */
-    displayMenuTable() {
-        const menuTable = this.createMenuTableWithoutInputs();
 
-        // Add header row
-        const headerRow = document.createElement('tr');
-        ['Product', 'Description', 'Price'].forEach(headerText => {
-            const header = document.createElement('th');
-            header.textContent = headerText;
-            headerRow.appendChild(header);
-        });
-        menuTable.appendChild(headerRow);
-
-        // Order products by product type
-        const orderedProducts = this.orderProductsByProductType();
-
-        // Add rows for each product
-        orderedProducts.forEach(product => {
-            const row = document.createElement('tr');
-            ['name', 'productType', 'price'].forEach(propertyName => {
-                const cell = document.createElement('td');
-                const cellContent = propertyName === 'price' ? `${product[propertyName]} €` : product[propertyName];
-                cell.textContent = cellContent;
-                row.appendChild(cell);
-            });
-            menuTable.appendChild(row);
-        });
-
-        // Display the table
-        const menuTableContainer = document.querySelector('.menu-table-container');
-        menuTableContainer.replaceChildren(menuTable);
-    }
 
     /**
      * Orders products by product type in the specified order.
@@ -533,9 +501,190 @@ class Menu {
         });
     }
 
+    /**
+  * Displays a table with all the products in the menu.
+  * @returns {HTMLTableElement} The created table element.
+  */
+    displayMenuTable() {
+        const menuTable = this.createMenuTableWithoutInputs();
+        menuTable.classList.add('menu-table');
+
+        const tableHeader = document.createElement('thead');
+        tableHeader.style.backgroundColor = 'lightblue';
+        tableHeader.style.color = '#ff0000';
+        const headerRow = document.createElement('tr');
+        const headers = ['Product Name', 'Price (€)', 'Product Type'];
+        headers.forEach(headerText => {
+            const headerCell = this.createMenuCell(headerText);
+            headerRow.appendChild(headerCell);
+        });
+        tableHeader.appendChild(headerRow);
+        menuTable.appendChild(tableHeader);
+
+        const orderedProducts = this.orderProductsByProductType();
+
+        const tableBody = document.createElement('tbody');
+        tableBody.style.backgroundColor = 'white';
+        orderedProducts.forEach(product => {
+            const productRow = document.createElement('tr');
+            const productNameCell = this.createMenuCell(product.name);
+            const priceCell = this.createMenuCell(product.price);
+            const productTypeCell = this.createMenuCell(product.productType);
+
+            productRow.appendChild(productNameCell);
+            productRow.appendChild(priceCell);
+            productRow.appendChild(productTypeCell);
+
+            productRow.addEventListener('click', () => this.toggleRowSelection(productRow));
+
+            tableBody.appendChild(productRow);
+        });
+
+
+        const buttonRow = document.createElement('tr');
+        buttonRow.className = 'btnRow-menu';
+
+        const addButtonCell = document.createElement('td');
+        addButtonCell.classList.add('btnRow-menu-td');
+        const removeButtonCell = document.createElement('td');
+        removeButtonCell.classList.add('btnRow-menu-td');
+        const editButtonCell = document.createElement('td');
+        editButtonCell.classList.add('btnRow-menu-td');
+
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add';
+        addButton.classList.add('menu-buttons');
+        addButton.addEventListener('click', () => this.addProductByPrompt());
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.classList.add('menu-buttons');
+        removeButton.addEventListener('click', () => this.removeSelectedFromMenu());
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('menu-buttons');
+        editButton.addEventListener('click', () => this.editSelectedFromMenu());
+
+        addButtonCell.appendChild(addButton);
+        removeButtonCell.appendChild(removeButton);
+        editButtonCell.appendChild(editButton);
+
+        buttonRow.appendChild(addButtonCell);
+        buttonRow.appendChild(removeButtonCell);
+        buttonRow.appendChild(editButtonCell);
 
 
 
+        menuTable.appendChild(tableBody);
+        menuTable.appendChild(buttonRow);
+
+        return menuTable;
+    }
+
+    /**
+     * Toggles the selection of a product row.
+     * @param {HTMLTableRowElement} productRow - The table row element representing a product.
+     */
+    toggleRowSelection(productRow) {
+        productRow.classList.toggle('selected');
+
+        // Check if the row is now selected or unselected
+        const isSelected = productRow.classList.contains('selected');
+
+        // Update the selected product in the menu
+        if (isSelected) {
+            this.selectedProductRow = productRow;
+        } else {
+            this.selectedProductRow = null;
+        }
+    }
+
+
+
+    /**
+        * Adds a product to the menu using user prompts.
+        */
+    addProductByPrompt() {
+        const productName = prompt('Enter the product name:');
+        const priceString = prompt('Enter the product price (€):');
+        const productType = prompt('Enter the product type:');
+
+        // Validate inputs
+        if (productName && priceString && productType) {
+            const price = parseFloat(priceString);
+
+            if (!isNaN(price) && price >= 0) {
+                // Create a new product with the provided details
+                const newProduct = new Product(productName, 0, price, productType);
+
+                // Add the new product to the menu
+                this.addProduct(newProduct);
+                showMenu();
+                // Display a success message
+                alert('Product added successfully!');
+
+            } else {
+                alert('Invalid price. Please enter a valid positive number.');
+            }
+        } else {
+            alert('Invalid input. Please enter all required information.');
+        }
+    }
+
+
+    /**
+    * Removes the selected product from the menu.
+    */
+    removeSelectedFromMenu() {
+        if (this.selectedProductRow) {
+            const selectedProductName = this.selectedProductRow.cells[0].textContent;
+            const selectedProduct = this.products.find(product => product.name === selectedProductName);
+
+            if (selectedProduct) {
+                this.removeProduct(selectedProduct);
+                this.selectedProductRow.remove();
+                this.selectedProductRow = null;
+                alert('Product removed successfully!');
+            }
+        } else {
+            alert('No product selected. Please select a product to remove.');
+        }
+    }
+
+    /**
+ * Edits the selected product in the menu.
+ */
+    editSelectedFromMenu() {
+        if (this.selectedProductRow) {
+            const selectedProductName = this.selectedProductRow.cells[0].textContent;
+            const selectedProduct = this.products.find(product => product.name === selectedProductName);
+
+            if (selectedProduct) {
+                const newProductName = prompt(`Enter the new name for ${selectedProductName}:`, selectedProduct.name);
+                const newPriceString = prompt(`Enter the new price for ${selectedProductName} (€):`, selectedProduct.price);
+                const newProductType = prompt(`Enter the new product type for ${selectedProductName}:`, selectedProduct.productType);
+
+                if (newProductName !== null && newPriceString !== null && newProductType !== null) {
+
+                    selectedProduct.name = newProductName.trim() || selectedProduct.name;
+                    selectedProduct.price = parseFloat(newPriceString.trim()) || selectedProduct.price;
+                    selectedProduct.productType = newProductType.trim() || selectedProduct.productType;
+
+
+                    this.selectedProductRow.cells[0].textContent = selectedProduct.name;
+                    this.selectedProductRow.cells[1].textContent = selectedProduct.price.toFixed(2) + ' €';
+                    this.selectedProductRow.cells[2].textContent = selectedProduct.productType;
+
+                    alert('Product updated successfully!');
+                } else {
+                    alert('Invalid input. Please enter valid values.');
+                }
+            }
+        } else {
+            alert('No product selected. Please select a product to edit.');
+        }
+    }
 
 }
 
@@ -558,7 +707,8 @@ class Table {
         this.hideTableOrder();
     }
 
-    /**
+
+    /** 
      * Hides the table order element.
      */
     hideTableOrder() {
@@ -577,6 +727,8 @@ class Table {
         const tableElement = document.createElement('div');
         tableElement.className = 'table';
         tableElement.textContent = `Table ${this.number}`;
+
+
         tableElement.addEventListener('click', () => this.showDetails());
         document.querySelector('.tables').appendChild(tableElement);
         return tableElement;
@@ -684,6 +836,10 @@ class Table {
                 menu.closeMenu();
             }
         }
+        
+
+
+
     }
 
 
@@ -792,8 +948,6 @@ class Table {
 
             console.log('Added new product to the table:', { name: product.name, quantity, price: quantity * product.price });
         }
-
-        // Update the UI to reflect the changes
         this.updateDetailsWithoutClosing();
     }
 
@@ -810,8 +964,10 @@ class Table {
 
             this.products.splice(selectedIndex, 1);
 
-            this.updateDetailsWithoutClosing();
+            this.hasProducts = this.products.length > 0;
+
         }
+        this.updateDetailsWithoutClosing();
     }
 
 
@@ -822,6 +978,7 @@ class Table {
      */
     closeOrder() {
         this.products = [];
+        this.updateTableColor();
         this.updateDetailsWithoutClosing();
     }
 
@@ -857,9 +1014,24 @@ class Table {
 
         menuView.appendChild(productList);
     }
+
+    /**
+     * Updates the color of the table based on the presence of products.
+     */
+    updateTableColor() {
+        if (this.products.length > 0) {
+            this.tableElement.style.backgroundColor = '#004085';
+            this.tableElement.style.color = 'white';
+        } else if (this.products.length === 0 && this.tableElement.classList.contains('selected')) {
+            this.tableElement.style.backgroundColor = 'lightblue';
+            this.tableElement.style.color = '#ff0000';
+        } else if (this.products.length === 0 && !this.tableElement.classList.contains('selected')) {
+            this.tableElement.style.backgroundColor = '#B5B5B5';
+            this.tableElement.style.color = 'black';
+        }
+    }
+
 }
-
-
 
 
 const tablesDiv = document.querySelector('.tables');
@@ -935,52 +1107,76 @@ menu.addProduct(product15);
 // Add event listeners to buttons
 document.getElementById('tablesButton').addEventListener('click', showTables);
 document.getElementById('menuButton').addEventListener('click', showMenu);
-document.getElementById('productTypesButton').addEventListener('click', showProductTypes);
+
 
 // Functions
+
+
 function showTables() {
-    document.querySelector(".tableOrder").style.display = "none";
-    document.querySelector(".menu").style.display = "none";
+    if (tablesDiv.style.display === 'none') {
+        tablesDiv.style.display = 'flex';
+        document.querySelector(".tableOrder").style.display = 'none';
+        menu.closeMenu();
+        document.querySelector(".menu-table-container").style.display = 'none';
+
+
+    } else {
+        document.querySelectorAll('.table').forEach(tableElement => {
+            tableElement.classList.remove('selected');
+        });
+
+        document.querySelector(".tableOrder").style.display = 'none';
+        menu.closeMenu()
+        document.querySelector(".menu-table-container").style.display = 'none';
+    }
 }
 
 
 
 
 function showMenu() {
-    // Hide other elements
-    document.querySelector(".tableOrder").style.display = "none";
-    document.querySelector(".tables").style.display = "none";
+    document.querySelectorAll('.table').forEach(tableElement => {
+        tableElement.classList.remove('selected');
+    });
 
-    // Get the menu container
-    const menuContainer = document.querySelector(".menu-container");
+    const menuContainer = document.querySelector(".menu");
+    const tablesContainer = document.querySelector(".tables");
+    const tableOrderContainer = document.querySelector(".tableOrder");
 
-    // Clear existing content in the menu container
-    while (menuContainer.firstChild) {
-        menuContainer.removeChild(menuContainer.firstChild);
+    if (menuContainer.style.display === 'none') {
+        while (menuContainer.firstChild) {
+            menuContainer.removeChild(menuContainer.firstChild);
+        }
+        menuContainer.appendChild(menu.displayMenuTable());
+        menuContainer.style.display = 'block';
+
+        // Hide .tables if it is displayed
+        if (tablesContainer.style.display !== 'none') {
+            tablesContainer.style.display = 'none';
+        }
+
+        // Hide .tableOrder if it is displayed
+        if (tableOrderContainer.style.display !== 'none') {
+            tableOrderContainer.style.display = 'none';
+
+        }
+    } else {
+        // Hide other elements
+        document.querySelector(".tables").style.display = 'none';
+        document.querySelector(".tableOrder").style.display = 'none';
+
+        // Hide the menu container
+        menuContainer.style.display = 'none';
+
+        // Clear and display menu table
+        while (menuContainer.firstChild) {
+            menuContainer.removeChild(menuContainer.firstChild);
+        }
+        menuContainer.appendChild(menu.displayMenuTable());
+        menuContainer.style.display = 'block';
     }
-
-    // Display the menu in table format
-    menu.displayMenuTable();
-
-    // Append the menu table to the menu container
-    menuContainer.appendChild(document.querySelector('.menu-table-container'));
-
-    // Create "Add Product" button
-    const addProductButton = document.createElement("button");
-    addProductButton.textContent = "Add Product";
-    addProductButton.className = "nav-to-menu-buttons"; // Add the class name
-    addProductButton.addEventListener("click", () => addProduct()); // Add click event
-
-    // Create "Remove Product" button
-    const removeProductButton = document.createElement("button");
-    removeProductButton.textContent = "Remove Product";
-    removeProductButton.className = "nav-to-menu-buttons"; // Add the class name
-    removeProductButton.addEventListener("click", () => removeProduct()); // Add click event
-
-    // Append buttons to the menu container
-    menuContainer.appendChild(addProductButton);
-    menuContainer.appendChild(removeProductButton);
-
-    // Set the menu container to be visible
-    menuContainer.style.display = "block";
 }
+
+
+
+
