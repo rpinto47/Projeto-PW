@@ -2,6 +2,8 @@
   --font-size: 16px;
 }
 
+
+
 body {
   display: flex;
   flex-wrap: wrap;
@@ -336,4 +338,32 @@ h1 {
 
 .btnRow-menu button {
   flex: 1;
+}
+
+
+.product-types-table {
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-top: 20px;
+}
+
+.product-types-table th, .product-types-table td {
+  border: 1px solid #ddd; 
+  padding: 8px; 
+  text-align: left; 
+}
+
+.product-types-table th {
+  background-color: lightblue;
+  color: #ff0000;
+}
+
+.product-types-table button {
+  width: 5em;
+  height: 2.8125em;
+  border-radius: 8%;
+  background-color: lightblue;
+  color: #ff0000;
+  cursor: pointer;
+  align-items: center;
 }

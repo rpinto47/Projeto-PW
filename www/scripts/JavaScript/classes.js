@@ -1,27 +1,5 @@
-/**
- * Enumerate class for creating enums.
- */
-class Enumerate {
-    constructor(...values) {
-        const uniqueValues = [...new Set(values)];
-
-        if (uniqueValues.length !== values.length) {
-            throw new Error('Duplicate values are not allowed in the enumeration.');
-        }
-
-        this.enumeration = Object.freeze(Object.fromEntries(uniqueValues.map(value => [value, value])));
-    }
-
-    get values() {
-        return Object.values(this.enumeration);
-    }
-
-    isValid(value) {
-        return this.values.includes(value);
-    }
-}
-
-const ProductTypes = new Enumerate('Entradas', 'Prato Principal', 'Sobremesa', 'Bebida');
+import { ProductTypes } from './enums.js';
+import { showMenu, populateMenu } from "./functions.js";
 
 /**
  * Represents a product with name, quantity, price, and product type.
@@ -425,7 +403,6 @@ class Menu {
 
         if (selectedProduct && selectedQuantity !== null) {
             if (this.selectedTable && typeof this.selectedTable.addProduct === 'function') {
-                // Add the selected product to the selected table
                 this.selectedTable.addProduct(selectedProduct, selectedQuantity);
             } else {
                 console.error('Selected table is invalid or does not have the addProduct method.');
@@ -463,7 +440,6 @@ class Menu {
         const selectedProductName = menuSelect ? menuSelect.value : null;
 
         if (selectedProductName) {
-            // Find the selected product in the products array
             return this.products.find(product => product.name === selectedProductName) || null;
         }
 
@@ -508,78 +484,90 @@ class Menu {
     displayMenuTable() {
         const menuTable = this.createMenuTableWithoutInputs();
         menuTable.classList.add('menu-table');
-
-        const tableHeader = document.createElement('thead');
-        tableHeader.style.backgroundColor = 'lightblue';
-        tableHeader.style.color = '#ff0000';
-        const headerRow = document.createElement('tr');
-        const headers = ['Product Name', 'Price (€)', 'Product Type'];
-        headers.forEach(headerText => {
-            const headerCell = this.createMenuCell(headerText);
-            headerRow.appendChild(headerCell);
-        });
-        tableHeader.appendChild(headerRow);
-        menuTable.appendChild(tableHeader);
+        this.createTableHeader(menuTable);
 
         const orderedProducts = this.orderProductsByProductType();
-
-        const tableBody = document.createElement('tbody');
-        tableBody.style.backgroundColor = 'white';
-        orderedProducts.forEach(product => {
-            const productRow = document.createElement('tr');
-            const productNameCell = this.createMenuCell(product.name);
-            const priceCell = this.createMenuCell(product.price);
-            const productTypeCell = this.createMenuCell(product.productType);
-
-            productRow.appendChild(productNameCell);
-            productRow.appendChild(priceCell);
-            productRow.appendChild(productTypeCell);
-
-            productRow.addEventListener('click', () => this.toggleRowSelection(productRow));
-
-            tableBody.appendChild(productRow);
-        });
-
-
-        const buttonRow = document.createElement('tr');
-        buttonRow.className = 'btnRow-menu';
-
-        const addButtonCell = document.createElement('td');
-        addButtonCell.classList.add('btnRow-menu-td');
-        const removeButtonCell = document.createElement('td');
-        removeButtonCell.classList.add('btnRow-menu-td');
-        const editButtonCell = document.createElement('td');
-        editButtonCell.classList.add('btnRow-menu-td');
-
-        const addButton = document.createElement('button');
-        addButton.textContent = 'Add';
-        addButton.classList.add('menu-buttons');
-        addButton.addEventListener('click', () => this.addProductByPrompt());
-
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'Remove';
-        removeButton.classList.add('menu-buttons');
-        removeButton.addEventListener('click', () => this.removeSelectedFromMenu());
-
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.classList.add('menu-buttons');
-        editButton.addEventListener('click', () => this.editSelectedFromMenu());
-
-        addButtonCell.appendChild(addButton);
-        removeButtonCell.appendChild(removeButton);
-        editButtonCell.appendChild(editButton);
-
-        buttonRow.appendChild(addButtonCell);
-        buttonRow.appendChild(removeButtonCell);
-        buttonRow.appendChild(editButtonCell);
-
-
-
+        const tableBody = this.createTableBody(orderedProducts);
         menuTable.appendChild(tableBody);
+
+        const buttonRow = this.createButtonRow();
         menuTable.appendChild(buttonRow);
 
         return menuTable;
+    }
+
+    createTableHeader(menuTable) {
+        const tableHeader = document.createElement('thead');
+        tableHeader.style.backgroundColor = 'lightblue';
+        tableHeader.style.color = '#ff0000';
+
+        const headers = ['Produto', 'Preço (€)', 'Tipo'];
+        const headerRow = this.createTableRow(headers, 'th');
+
+        tableHeader.appendChild(headerRow);
+        menuTable.appendChild(tableHeader);
+    }
+
+    createTableBody(products) {
+        const tableBody = document.createElement('tbody');
+        tableBody.style.backgroundColor = 'white';
+
+        products.forEach(product => {
+            const productRow = this.createTableRow(
+                [product.name, product.price, product.productType],
+                'td'
+            );
+
+            productRow.addEventListener('click', () => this.toggleRowSelection(productRow));
+            tableBody.appendChild(productRow);
+        });
+
+        return tableBody;
+    }
+
+    createButtonRow() {
+        const buttonRow = document.createElement('tr');
+        buttonRow.className = 'btnRow-menu';
+
+        const buttonLabels = ['Add', 'Remove', 'Edit'];
+        const buttonActions = [
+            () => this.addProductByPrompt(),
+            () => this.removeSelectedFromMenu(),
+            () => this.editSelectedFromMenu()
+        ];
+
+        buttonLabels.forEach((label, index) => {
+            const buttonCell = this.createTableCell('td');
+            const button = this.createButton(label, buttonActions[index]);
+            buttonCell.appendChild(button);
+            buttonRow.appendChild(buttonCell);
+        });
+
+        return buttonRow;
+    }
+
+    createTableRow(data, cellType) {
+        const tableRow = document.createElement('tr');
+        data.forEach(value => {
+            const cell = this.createTableCell(cellType);
+            cell.textContent = (cellType === 'td' && typeof value === 'number') ? `${value.toFixed(2)} €` : value;
+            tableRow.appendChild(cell);
+        });
+        return tableRow;
+    }
+
+    createTableCell(cellType) {
+        const cell = document.createElement(cellType);
+        cell.classList.add(`menu-${cellType}`);
+        return cell;
+    }
+
+    createButton(label, action) {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.classList.add('menu-buttons');
+        button.addEventListener('click', action);
+        return button;
     }
 
     /**
@@ -589,10 +577,8 @@ class Menu {
     toggleRowSelection(productRow) {
         productRow.classList.toggle('selected');
 
-        // Check if the row is now selected or unselected
         const isSelected = productRow.classList.contains('selected');
 
-        // Update the selected product in the menu
         if (isSelected) {
             this.selectedProductRow = productRow;
         } else {
@@ -610,18 +596,17 @@ class Menu {
         const priceString = prompt('Enter the product price (€):');
         const productType = prompt('Enter the product type:');
 
-        // Validate inputs
         if (productName && priceString && productType) {
             const price = parseFloat(priceString);
 
             if (!isNaN(price) && price >= 0) {
-                // Create a new product with the provided details
+                
                 const newProduct = new Product(productName, 0, price, productType);
 
-                // Add the new product to the menu
+                
                 this.addProduct(newProduct);
                 showMenu();
-                // Display a success message
+                
                 alert('Product added successfully!');
 
             } else {
@@ -688,9 +673,9 @@ class Menu {
 
 }
 
-const menu = new Menu();
 
-
+const menu = new Menu()
+populateMenu(menu);
 /**
  * Represents a table with associated products and order details.
  */
@@ -759,7 +744,7 @@ class Table {
      */
     createProductRow(product, index) {
         const row = document.createElement('tr');
-        row.dataset.index = index; // Set the index as a data attribute
+        row.dataset.index = index; 
         row.classList.add('product-row', 'selectable');
 
         ['name', 'quantity', 'price'].forEach(propertyName => {
@@ -836,10 +821,6 @@ class Table {
                 menu.closeMenu();
             }
         }
-        
-
-
-
     }
 
 
@@ -865,13 +846,12 @@ class Table {
                 table.appendChild(this.createProductRow(product));
             });
 
-            // Add a row for the total
             const totalRow = document.createElement('tr');
             totalRow.classList.add('product-row', 'selectable');
 
             const totalCell = document.createElement('td');
             totalCell.textContent = 'Total';
-            totalCell.colSpan = 2; // Span two columns for 'Product' and 'Quantity'
+            totalCell.colSpan = 2; 
             totalRow.appendChild(totalCell);
 
             const totalAmountCell = document.createElement('td');
@@ -978,7 +958,6 @@ class Table {
      */
     closeOrder() {
         this.products = [];
-        this.updateTableColor();
         this.updateDetailsWithoutClosing();
     }
 
@@ -1015,168 +994,7 @@ class Table {
         menuView.appendChild(productList);
     }
 
-    /**
-     * Updates the color of the table based on the presence of products.
-     */
-    updateTableColor() {
-        if (this.products.length > 0) {
-            this.tableElement.style.backgroundColor = '#004085';
-            this.tableElement.style.color = 'white';
-        } else if (this.products.length === 0 && this.tableElement.classList.contains('selected')) {
-            this.tableElement.style.backgroundColor = 'lightblue';
-            this.tableElement.style.color = '#ff0000';
-        } else if (this.products.length === 0 && !this.tableElement.classList.contains('selected')) {
-            this.tableElement.style.backgroundColor = '#B5B5B5';
-            this.tableElement.style.color = 'black';
-        }
-    }
-
 }
 
 
-const tablesDiv = document.querySelector('.tables');
-
-const addButton = document.createElement('button');
-addButton.textContent = 'Add Tables';
-addButton.addEventListener('click', addTables);
-addButton.classList.add('add-tables-button');
-tablesDiv.appendChild(addButton);
-
-document.querySelector('.tableOrder').style.display = 'none';
-document.querySelector('.menu').style.display = 'none';
-
-function addTables() {
-    const numberOfTables = prompt("Enter the number of tables you want:", "20");
-
-    if (numberOfTables !== null) {
-        const parsedNumber = parseInt(numberOfTables);
-
-        if (!isNaN(parsedNumber) && parsedNumber > 0) {
-            document.querySelector('.tables');
-            addButton.style.display = 'none';
-
-            for (let i = 1; i <= parsedNumber; i++) {
-                new Table(i);
-            }
-        } else {
-            alert("Invalid input. Please enter a positive integer.");
-        }
-    }
-}
-
-
-
-const product1 = new Product("Caesar Salad", 1, 8.99, "Entradas");
-const product2 = new Product("Caprese Salad", 1, 9.99, "Entradas");
-const product3 = new Product("Bruschetta", 1, 7.49, "Entradas");
-
-const product4 = new Product("Margherita Pizza", 1, 12.99, "Prato Principal");
-const product5 = new Product("Penne alla Vodka", 1, 10.99, "Prato Principal");
-const product6 = new Product("Grilled Chicken Sandwich", 1, 9.99, "Prato Principal");
-
-const product7 = new Product("Chocolate Brownie", 1, 5.99, "Sobremesa");
-const product8 = new Product("Tiramisu", 1, 7.99, "Sobremesa");
-const product9 = new Product("Cheesecake", 1, 8.49, "Sobremesa");
-
-const product10 = new Product("Coca-Cola", 1, 2.49, "Bebida");
-const product11 = new Product("Orange Juice", 1, 3.29, "Bebida");
-const product12 = new Product("Iced Tea", 1, 2.99, "Bebida");
-
-const product13 = new Product("Chicken Alfredo", 1, 11.99, "Prato Principal");
-const product14 = new Product("Mango Sorbet", 1, 4.99, "Sobremesa");
-const product15 = new Product("Minestrone Soup", 1, 6.49, "Entradas");
-
-menu.addProduct(product1);
-menu.addProduct(product2);
-menu.addProduct(product3);
-menu.addProduct(product4);
-menu.addProduct(product5);
-menu.addProduct(product6);
-menu.addProduct(product7);
-menu.addProduct(product8);
-menu.addProduct(product9);
-menu.addProduct(product10);
-menu.addProduct(product11);
-menu.addProduct(product12);
-menu.addProduct(product13);
-menu.addProduct(product14);
-menu.addProduct(product15);
-
-
-
-// Add event listeners to buttons
-document.getElementById('tablesButton').addEventListener('click', showTables);
-document.getElementById('menuButton').addEventListener('click', showMenu);
-
-
-// Functions
-
-
-function showTables() {
-    if (tablesDiv.style.display === 'none') {
-        tablesDiv.style.display = 'flex';
-        document.querySelector(".tableOrder").style.display = 'none';
-        menu.closeMenu();
-        document.querySelector(".menu-table-container").style.display = 'none';
-
-
-    } else {
-        document.querySelectorAll('.table').forEach(tableElement => {
-            tableElement.classList.remove('selected');
-        });
-
-        document.querySelector(".tableOrder").style.display = 'none';
-        menu.closeMenu()
-        document.querySelector(".menu-table-container").style.display = 'none';
-    }
-}
-
-
-
-
-function showMenu() {
-    document.querySelectorAll('.table').forEach(tableElement => {
-        tableElement.classList.remove('selected');
-    });
-
-    const menuContainer = document.querySelector(".menu");
-    const tablesContainer = document.querySelector(".tables");
-    const tableOrderContainer = document.querySelector(".tableOrder");
-
-    if (menuContainer.style.display === 'none') {
-        while (menuContainer.firstChild) {
-            menuContainer.removeChild(menuContainer.firstChild);
-        }
-        menuContainer.appendChild(menu.displayMenuTable());
-        menuContainer.style.display = 'block';
-
-        // Hide .tables if it is displayed
-        if (tablesContainer.style.display !== 'none') {
-            tablesContainer.style.display = 'none';
-        }
-
-        // Hide .tableOrder if it is displayed
-        if (tableOrderContainer.style.display !== 'none') {
-            tableOrderContainer.style.display = 'none';
-
-        }
-    } else {
-        // Hide other elements
-        document.querySelector(".tables").style.display = 'none';
-        document.querySelector(".tableOrder").style.display = 'none';
-
-        // Hide the menu container
-        menuContainer.style.display = 'none';
-
-        // Clear and display menu table
-        while (menuContainer.firstChild) {
-            menuContainer.removeChild(menuContainer.firstChild);
-        }
-        menuContainer.appendChild(menu.displayMenuTable());
-        menuContainer.style.display = 'block';
-    }
-}
-
-
-
-
+export { Product, TableOrder, Menu, Table, menu };
