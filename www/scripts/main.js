@@ -1,5 +1,5 @@
-import { createProductTypesTable, ProductTypes } from "./JavaScript/enums.js";
-import { addTables, showTables, showMenu, showProductTypesTable } from "./JavaScript/functions.js";
+import { createProductTypesTable, ProductTypes } from "./enums.js";
+import { addTables, showTables, showMenu, showProductTypesTable } from "./functions.js";
 
 const tablesDiv = document.querySelector(".tables");
 const addButton = document.createElement("button");
