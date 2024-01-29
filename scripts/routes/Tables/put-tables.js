@@ -5,6 +5,11 @@ const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+/**
+ * Establishes a connection to the MySQL database.
+ * @returns {Promise<mysql.Connection>} A promise resolving to the database connection.
+ * @throws {Error} Throws an error if there's an issue connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -16,12 +21,20 @@ const connectToDatabase = async () => {
   }
 };
 
+/**
+ * Express route to close orders associated with a specific table.
+ * @name PUT /tables/:id
+ * @function
+ * @memberof module:Server
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<void>} A promise resolving to the response being sent.
+ */
 app.put('/tables/:id', async (req, res) => {
   try {
     const connection = await connectToDatabase();
     const tableId = req.params.id;
 
-    // Delete OrderProduct records associated with the TableOrder
     const deleteOrderProductsQuery = `
       DELETE FROM OrderProduct
       WHERE OrderID IN (
@@ -43,7 +56,6 @@ app.put('/tables/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

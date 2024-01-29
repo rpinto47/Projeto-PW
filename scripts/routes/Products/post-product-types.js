@@ -1,10 +1,14 @@
-"use strict";
 const express = require('express');
 const mysql = require("mysql2/promise");
 const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+/**
+ * Establishes a connection to the database using the provided options.
+ * @returns {Promise<mysql.Connection>} A promise that resolves to a MySQL connection.
+ * @throws Will throw an error if there's an issue connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -16,28 +20,29 @@ const connectToDatabase = async () => {
   }
 };
 
+/**
+ * Handles POST requests to add a new product type.
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The response object.
+ * @returns {Promise<void>} A promise that resolves when the handling is complete.
+ */
 app.post('/product-types/:id', async (req, res) => {
   try {
     const connection = await connectToDatabase();
     
-    // Extract typeName from request body
     const { typeName } = req.body;
 
-    // Check if typeName is provided
     if (!typeName) {
       return res.status(400).json({ error: 'Incomplete request data' });
     }
 
-    // Use an INSERT query to add a new product type
     const insertQuery = `
       INSERT INTO ProductType (TypeName)
       VALUES (?);
     `;
 
-    // Execute the query with typeName as a parameter
     const [result] = await connection.execute(insertQuery, [typeName]);
 
-    // Check if the insertion was successful
     if (result.affectedRows > 0) {
       res.json({ message: 'Product type added successfully' });
     } else {
@@ -47,11 +52,14 @@ app.post('/product-types/:id', async (req, res) => {
     console.error('Error executing insert query:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   } finally {
-    // Close the database connection
     await connection.end();
   }
 });
 
+/**
+ * Starts the Express server on the specified port.
+ * @constant {number} PORT - The port on which the server will listen.
+ */
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

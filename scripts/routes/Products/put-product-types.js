@@ -1,13 +1,16 @@
-"use strict";
 const express = require('express');
 const mysql = require("mysql2/promise");
 const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
-// Middleware to parse JSON in the request body
 app.use(express.json());
 
+/**
+ * Establishes a connection to the database.
+ * @returns {Promise<import('mysql2/promise').Connection>} The database connection.
+ * @throws Will throw an error if connection to the database fails.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -19,30 +22,32 @@ const connectToDatabase = async () => {
   }
 };
 
+/**
+ * Adds a new product type to the database.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ */
 app.post('/product-types/:id', async (req, res) => {
-  let connection; // Declare the connection variable outside the try block
+  let connection;
 
   try {
     connection = await connectToDatabase();
 
-    // Extract typeName from request body
+    /** @type {string} */
     const { typeName } = req.body;
 
-    // Check if typeName is provided
     if (!typeName) {
       return res.status(400).json({ error: 'Incomplete request data' });
     }
 
-    // Use an INSERT query to add a new product type
     const insertQuery = `
       INSERT INTO ProductType (TypeName)
       VALUES (?);
     `;
 
-    // Execute the query with typeName as a parameter
     const [result] = await connection.execute(insertQuery, [typeName]);
 
-    // Check if the insertion was successful
     if (result.affectedRows > 0) {
       res.json({ message: 'Product type added successfully' });
     } else {
@@ -52,13 +57,16 @@ app.post('/product-types/:id', async (req, res) => {
     console.error('Error executing insert query:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   } finally {
-    // Close the database connection in the finally block
     if (connection) {
       await connection.end();
     }
   }
 });
 
+/**
+ * Starts the Express server on the specified port.
+ * @constant {number} PORT - The port on which the server will listen.
+ */
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

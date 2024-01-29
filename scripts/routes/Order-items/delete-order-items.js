@@ -1,10 +1,16 @@
 "use strict";
+
 const express = require('express');
 const mysql = require("mysql2/promise");
 const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+/**
+ * Establishes a connection to the database.
+ * @returns {Promise<mysql.Connection>} A promise that resolves to a MySQL connection.
+ * @throws {Error} If there is an error connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -16,16 +22,24 @@ const connectToDatabase = async () => {
   }
 };
 
+/**
+ * Deletes order items and associated table orders.
+ * @function
+ * @async
+ * @name deleteOrderItems
+ * @memberof module:express-server
+ * @param {express.Request} req - The Express request object.
+ * @param {express.Response} res - The Express response object.
+ * @returns {Promise<void>} A promise that resolves once the operation is complete.
+ */
 app.delete('/order-items/:id', async (req, res) => {
   try {
     const connection = await connectToDatabase();
     const identifier = req.params.id;
 
-    // Transaction: Start a transaction to ensure atomicity
     await connection.beginTransaction();
 
     try {
-      // Delete OrderProduct records associated with the TableOrder
       const deleteOrderProductsQuery = `
         DELETE FROM OrderProduct
         WHERE OrderID IN (
@@ -36,14 +50,12 @@ app.delete('/order-items/:id', async (req, res) => {
       `;
       await connection.execute(deleteOrderProductsQuery, [identifier, identifier]);
 
-      // Delete the TableOrder
       const deleteTableOrderQuery = `
         DELETE FROM TableOrder
         WHERE MesaID = ? OR OrderID = ?;
       `;
       const [result] = await connection.execute(deleteTableOrderQuery, [identifier, identifier]);
 
-      // Commit the transaction
       await connection.commit();
 
       if (result.affectedRows > 0) {
@@ -52,9 +64,8 @@ app.delete('/order-items/:id', async (req, res) => {
         res.status(404).json({ error: 'Order items or TableOrder not found' });
       }
     } catch (error) {
-      // Rollback the transaction in case of an error
       await connection.rollback();
-      throw error; // Propagate the error after rolling back
+      throw error;
     }
   } catch (err) {
     console.error('Error executing delete query:', err);
@@ -62,6 +73,10 @@ app.delete('/order-items/:id', async (req, res) => {
   }
 });
 
+/**
+ * Starts the Express server on the specified port.
+ * @constant {number} PORT - The port on which the server will listen.
+ */
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

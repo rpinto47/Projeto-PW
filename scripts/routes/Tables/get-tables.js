@@ -6,6 +6,13 @@ const app = express();
 const connectionOptions = require("../../connection-options.json");
 
 
+/**
+ * Establishes a connection to the database using the provided options.
+ * @function
+ * @async
+ * @returns {Promise<mysql.Connection>} A promise that resolves to a MySQL connection.
+ * @throws {Error} If an error occurs while connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -17,13 +24,21 @@ const connectToDatabase = async () => {
   }
 };
 
-
+/**
+ * Handles the GET request to retrieve information about tables.
+ * @function
+ * @async
+ * @param {express.Request} req - Express request object.
+ * @param {express.Response} res - Express response object.
+ * @returns {Promise<void>} A promise that resolves after processing the request.
+ */
 app.get('/tables', async (req, res) => {
   try {
     const connection = await connectToDatabase();
 
     const query = `
-      SELECT Mesa.MesaID FROM Mesa;
+      SELECT Mesa.MesaID, Mesa.TableNumber, Mesa.OpenOrders
+      FROM Mesa;
     `;
 
     const [results] = await connection.execute(query);
@@ -38,6 +53,8 @@ app.get('/tables', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
 
 
 const PORT = 3000;

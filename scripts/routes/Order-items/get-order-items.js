@@ -5,17 +5,26 @@ const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+/**
+ * Establishes a connection to the database using provided options.
+ * @returns {Promise<import("mysql2/promise").Connection>} A promise that resolves to a MySQL database connection.
+ * @throws {Error} If there is an error connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
-    console.log('Connected to the database');
     return connection;
   } catch (err) {
-    console.error('Error connecting to the database:', err);
     throw err;
   }
 };
 
+/**
+ * Retrieves order items for a specific table from the database.
+ * @param {import("express").Request} req - The Express request object.
+ * @param {import("express").Response} res - The Express response object.
+ * @returns {Promise<void>} A promise that resolves after handling the request.
+ */
 app.get('/order-items/:table', async (req, res) => {
   try {
     const connection = await connectToDatabase();
@@ -49,6 +58,10 @@ app.get('/order-items/:table', async (req, res) => {
   }
 });
 
+/**
+ * Starts the Express server on the specified port.
+ * @constant {number} PORT - The port on which the server will listen.
+ */
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

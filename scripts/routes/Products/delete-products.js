@@ -1,10 +1,14 @@
-"use strict";
 const express = require('express');
 const mysql = require("mysql2/promise");
 const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+/**
+ * Connects to the database using the provided connection options.
+ * @returns {Promise<object>} A Promise that resolves to a database connection.
+ * @throws {Error} If there is an error connecting to the database.
+ */
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -15,12 +19,18 @@ const connectToDatabase = async () => {
     throw err;
   }
 };
+
+/**
+ * Deletes a product and its associated OrderProducts from the database.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ * @returns {void}
+ */
 app.delete('/products/:id', async (req, res) => {
   try {
     const connection = await connectToDatabase();
     const productId = req.params.id;
 
-    // Check if there are associated OrderProduct records
     const orderProductsQuery = `
       SELECT OrderProductID
       FROM OrderProduct
@@ -29,7 +39,6 @@ app.delete('/products/:id', async (req, res) => {
     const [orderProductsResult] = await connection.execute(orderProductsQuery, [productId]);
 
     if (orderProductsResult.length > 0) {
-      // If there are associated OrderProduct records, delete them first
       const deleteOrderProductsQuery = `
         DELETE FROM OrderProduct
         WHERE ProductID = ?;
@@ -37,7 +46,6 @@ app.delete('/products/:id', async (req, res) => {
       await connection.execute(deleteOrderProductsQuery, [productId]);
     }
 
-    // Now you can delete the Product
     const deleteQuery = `
       DELETE FROM Product
       WHERE ProductID = ?;
@@ -55,6 +63,10 @@ app.delete('/products/:id', async (req, res) => {
   }
 });
 
+/**
+ * Starts the Express server on the specified port.
+ * @constant {number} PORT - The port on which the server will listen.
+ */
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
