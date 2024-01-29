@@ -16,35 +16,53 @@ const connectToDatabase = async () => {
   }
 };
 
-app.delete('/order-items/:table/:productId', async (req, res) => {
+app.delete('/order-items/:id', async (req, res) => {
+  try {
+    const connection = await connectToDatabase();
+    const identifier = req.params.id;
+
+    // Transaction: Start a transaction to ensure atomicity
+    await connection.beginTransaction();
+
     try {
-      const connection = await connectToDatabase();
-      const tableId = req.params.table;
-      const productId = req.params.productId;
-  
-      const deleteQuery = `
+      // Delete OrderProduct records associated with the TableOrder
+      const deleteOrderProductsQuery = `
         DELETE FROM OrderProduct
         WHERE OrderID IN (
           SELECT OrderID
           FROM TableOrder
-          WHERE MesaID = ?
-        ) AND ProductID = ?;
+          WHERE MesaID = ? OR OrderID = ?
+        );
       `;
-  
-      const [result] = await connection.execute(deleteQuery, [tableId, productId]);
-  
+      await connection.execute(deleteOrderProductsQuery, [identifier, identifier]);
+
+      // Delete the TableOrder
+      const deleteTableOrderQuery = `
+        DELETE FROM TableOrder
+        WHERE MesaID = ? OR OrderID = ?;
+      `;
+      const [result] = await connection.execute(deleteTableOrderQuery, [identifier, identifier]);
+
+      // Commit the transaction
+      await connection.commit();
+
       if (result.affectedRows > 0) {
-        res.json({ message: 'Order item removed successfully' });
+        res.json({ message: 'Order items and TableOrder removed successfully' });
       } else {
-        res.status(404).json({ error: 'Order item not found' });
+        res.status(404).json({ error: 'Order items or TableOrder not found' });
       }
-    } catch (err) {
-      console.error('Error executing delete query:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+    } catch (error) {
+      // Rollback the transaction in case of an error
+      await connection.rollback();
+      throw error; // Propagate the error after rolling back
     }
-  });
-  
-  const PORT = 3000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  } catch (err) {
+    console.error('Error executing delete query:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

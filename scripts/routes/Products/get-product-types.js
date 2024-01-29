@@ -16,16 +16,30 @@ const connectToDatabase = async () => {
   }
 };
 
-app.get('/product-types', async (req, res) => {
+app.get('/product-types/:id?', async (req, res) => {
   try {
     const connection = await connectToDatabase();
+    const productTypeId = req.params.id;
 
-    const query = `
-      SELECT ProductType.ProductTypeID, ProductType.TypeName
-      FROM ProductType;
-    `;
+    let query;
+    let params;
 
-    const [results] = await connection.execute(query);
+    if (productTypeId) {
+      query = `
+        SELECT ProductType.ProductTypeID, ProductType.TypeName
+        FROM ProductType
+        WHERE ProductType.ProductTypeID = ?;
+      `;
+      params = [productTypeId];
+    } else {
+      query = `
+        SELECT ProductType.ProductTypeID, ProductType.TypeName
+        FROM ProductType;
+      `;
+      params = [];
+    }
+
+    const [results] = await connection.execute(query, params);
 
     const productTypesInfo = results.map((row) => {
       return {

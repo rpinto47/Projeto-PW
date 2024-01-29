@@ -3,6 +3,9 @@ const express = require('express');
 const mysql = require("mysql2/promise");
 const app = express();
 
+// Middleware to parse JSON in the request body
+app.use(express.json());
+
 const connectionOptions = require("../../connection-options.json");
 
 const connectToDatabase = async () => {

@@ -5,6 +5,9 @@ const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+// Middleware to parse JSON in the request body
+app.use(express.json());
+
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -16,36 +19,47 @@ const connectToDatabase = async () => {
   }
 };
 
-app.put('/product-types/:id', async (req, res) => {
-    try {
-      const connection = await connectToDatabase();
-      const productTypeId = req.params.id;
-      const { typeName } = req.body;
+app.post('/product-types/:id', async (req, res) => {
+  let connection; // Declare the connection variable outside the try block
 
-      if (!typeName) {
-        return res.status(400).json({ error: 'Incomplete request data' });
-      }
-  
-      const updateQuery = `
-        UPDATE ProductType
-        SET TypeName = ?
-        WHERE ProductTypeID = ?;
-      `;
-  
-      const [result] = await connection.execute(updateQuery, [typeName, productTypeId]);
-  
-      if (result.affectedRows > 0) {
-        res.json({ message: 'Product type updated successfully' });
-      } else {
-        res.status(404).json({ error: 'Product type not found' });
-      }
-    } catch (err) {
-      console.error('Error executing update query:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+  try {
+    connection = await connectToDatabase();
+
+    // Extract typeName from request body
+    const { typeName } = req.body;
+
+    // Check if typeName is provided
+    if (!typeName) {
+      return res.status(400).json({ error: 'Incomplete request data' });
     }
-  });
-  
-  const PORT = 3000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+
+    // Use an INSERT query to add a new product type
+    const insertQuery = `
+      INSERT INTO ProductType (TypeName)
+      VALUES (?);
+    `;
+
+    // Execute the query with typeName as a parameter
+    const [result] = await connection.execute(insertQuery, [typeName]);
+
+    // Check if the insertion was successful
+    if (result.affectedRows > 0) {
+      res.json({ message: 'Product type added successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to add product type' });
+    }
+  } catch (err) {
+    console.error('Error executing insert query:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    // Close the database connection in the finally block
+    if (connection) {
+      await connection.end();
+    }
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

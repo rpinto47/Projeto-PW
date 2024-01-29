@@ -5,6 +5,9 @@ const app = express();
 
 const connectionOptions = require("../../connection-options.json");
 
+// Middleware to parse JSON in the request body
+app.use(express.json());
+
 const connectToDatabase = async () => {
   try {
     const connection = await mysql.createConnection(connectionOptions);
@@ -16,48 +19,54 @@ const connectToDatabase = async () => {
   }
 };
 
-app.put('/order-items/:table/:productId', async (req, res) => {
+app.put('/order-items/:id', async (req, res) => {
+  try {
+    console.log('Received PUT request for order item update');
+
+    const connection = await connectToDatabase();
+    const orderId = req.params.id;
+    const { quantity } = req.body;
+
+    // Check if required fields are present
+    if (!quantity) {
+      console.log('Incomplete request data');
+      return res.status(400).json({ error: 'Incomplete request data' });
+    }
+
     try {
-      const connection = await connectToDatabase();
-      const tableId = req.params.table;
-      const productId = req.params.productId;
-      const { quantity } = req.body;
-
-      if (!quantity) {
-        return res.status(400).json({ error: 'Incomplete request data' });
-      }
-
-      const tableExistsQuery = 'SELECT MesaID FROM TableOrder WHERE MesaID = ?';
-      const [tableExists] = await connection.execute(tableExistsQuery, [tableId]);
-  
-      if (tableExists.length === 0) {
-        return res.status(404).json({ error: 'Table not found' });
-      }
+      await connection.beginTransaction();
 
       const updateQuery = `
         UPDATE OrderProduct
         SET Quantity = ?
-        WHERE OrderID IN (
-          SELECT OrderID
-          FROM TableOrder
-          WHERE MesaID = ?
-        ) AND ProductID = ?;
+        WHERE OrderID = ?;
       `;
-  
-      const [result] = await connection.execute(updateQuery, [quantity, tableId, productId]);
-  
+
+      const [result] = await connection.execute(updateQuery, [quantity, orderId]);
+
       if (result.affectedRows > 0) {
+        console.log('Order item updated successfully');
+        await connection.commit();
         res.json({ message: 'Order item updated successfully' });
       } else {
+        console.log('Order item not found');
+        await connection.rollback();
         res.status(404).json({ error: 'Order item not found' });
       }
     } catch (err) {
       console.error('Error executing update query:', err);
+      await connection.rollback();
       res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+      await connection.end();
     }
-  });
-  
-  const PORT = 3000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  } catch (err) {
+    console.error('Error connecting to the database:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
