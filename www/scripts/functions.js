@@ -151,3 +151,86 @@ function hideElements() {
         productTypeDiv.style.display = "none";
     }
 }
+
+/*---------------------------------------------------------------- Product Types ----------------------------------------------------------------
+/**
+ * Fetch product data from the JSON database.
+ * @param {string|null} id - Optional ID to include in the URL.
+ * @returns {Promise<Array>} A promise that resolves with an array of product data.
+ */
+async function fetchProductTypesData(id = null) {
+    try {
+        const url = id ? `http://localhost:3000/product-types/${id}` : 'http://localhost:3000/product-types';
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch product data');
+        }
+        
+        const productData = await response.json();
+        return productData;
+    } catch (error) {
+        console.error('Error fetching product data:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Get product types from the JSON database.
+ * @param {string|null} id - Optional ID to include in the URL.
+ * @returns {Promise<Enumerate>} A promise that resolves with an Enumerate instance.
+ */
+async function getProductTypes(id = null) {
+    try {
+        const productData = await fetchProductTypesData(id);
+        const productTypes = new Enumerate(...productData.map(product => product.type));
+        return productTypes;
+    } catch (error) {
+        console.error('Error getting product types:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Add a new product type to the JSON database.
+ * @param {string} newType - The new product type to add.
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ */
+async function addProductType(newType) {
+    try {
+        const response = await fetch('http://localhost:3000/product-types', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type: newType }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add product type');
+        }
+    } catch (error) {
+        console.error('Error adding product type:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Delete a product type from the JSON database.
+ * @param {string} typeToDelete - The product type to delete.
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ */
+async function deleteProductType(typeToDelete) {
+    try {
+        const response = await fetch(`http://localhost:3000/product-types?type=${typeToDelete}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete product type');
+        }
+    } catch (error) {
+        console.error('Error deleting product type:', error.message);
+        throw error;
+    }
+}

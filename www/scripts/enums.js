@@ -42,10 +42,16 @@ class Enumerate {
     /**
      * Add a new value to the enumeration.
      */
-    addValue() {
+    async addValue() {
+        // Instead of using prompt, call the addProductType API function
         const newValue = prompt('Enter a new value to add:');
         if (newValue && !this.isValid(newValue)) {
-            this.enumeration = Object.freeze({ ...this.enumeration, [newValue]: newValue });
+            try {
+                await Enumerate.addProductType(newValue);
+                refreshProductTypesTable();
+            } catch (error) {
+                console.error('Error adding product type:', error.message);
+            }
         } else if (this.isValid(newValue)) {
             alert('Value already exists in the enumeration.');
         } else {
@@ -56,40 +62,121 @@ class Enumerate {
     /**
      * Delete a value from the enumeration.
      */
-    deleteValue() {
+    async deleteValue() {
+        // Instead of using prompt, call the deleteProductType API function
         const valueToDelete = prompt('Enter a value to delete:');
         if (valueToDelete && this.isValid(valueToDelete)) {
-            const updatedEnumeration = { ...this.enumeration };
-            delete updatedEnumeration[valueToDelete];
-            this.enumeration = Object.freeze(updatedEnumeration);
+            try {
+                await Enumerate.deleteProductType(valueToDelete);
+                refreshProductTypesTable();
+            } catch (error) {
+                console.error('Error deleting product type:', error.message);
+            }
         } else if (!valueToDelete) {
             alert('Invalid input. Please enter a non-empty value.');
         } else {
             alert('Value does not exist in the enumeration.');
         }
     }
+
+    /**
+     * Fetch product data from the JSON database.
+     * @param {string|null} id - Optional ID to include in the URL.
+     * @returns {Promise<Array>} A promise that resolves with an array of product data.
+     */
+    static async fetchProductData(id = null) {
+        try {
+            const url = id ? `http://localhost:3000/product-types/${id}` : 'http://localhost:3000/product-types';
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch product data');
+            }
+
+            const productData = await response.json();
+            return productData;
+        } catch (error) {
+            console.error('Error fetching product data:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Get product types from the JSON database.
+     * @param {string|null} id - Optional ID to include in the URL.
+     * @returns {Promise<Enumerate>} A promise that resolves with an Enumerate instance.
+     */
+    static async getProductTypes(id = null) {
+        try {
+            const productData = await Enumerate.fetchProductData(id);
+            const productTypes = new Enumerate(...productData.map(product => product.type));
+            return productTypes;
+        } catch (error) {
+            console.error('Error getting product types:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Add a new product type to the JSON database.
+     * @param {string} newType - The new product type to add.
+     * @returns {Promise<void>} A promise that resolves when the operation is complete.
+     */
+    static async addProductType(newType) {
+        try {
+            const response = await fetch('http://localhost:3000/product-types', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type: newType }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add product type');
+            }
+        } catch (error) {
+            console.error('Error adding product type:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete a product type from the JSON database.
+     * @param {string} typeToDelete - The product type to delete.
+     * @returns {Promise<void>} A promise that resolves when the operation is complete.
+     */
+    static async deleteProductType(typeToDelete) {
+        try {
+            const response = await fetch(`http://localhost:3000/product-types?type=${typeToDelete}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete product type');
+            }
+        } catch (error) {
+            console.error('Error deleting product type:', error.message);
+            throw error;
+        }
+    }
 }
 
-/**
- * An instance of Enumerate for product types.
- * @const {Enumerate}
- */
+// An instance of Enumerate for product types.
 const ProductTypes = new Enumerate('Entrada', 'Prato', 'Sobremesa', 'Bebida');
 
 /**
  * Add a new value to the product types enumeration and refresh the product types table.
  */
-function addValue() {
-    ProductTypes.addValue();
-    refreshProductTypesTable();
+async function addValue() {
+    await ProductTypes.addValue();
 }
 
 /**
  * Delete a value from the product types enumeration and refresh the product types table.
  */
-function deleteValue() {
-    ProductTypes.deleteValue();
-    refreshProductTypesTable();
+async function deleteValue() {
+    await ProductTypes.deleteValue();
 }
 
 /**

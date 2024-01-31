@@ -7,10 +7,10 @@ import { showMenu, populateMenu } from "./functions.js";
 class Product {
     /**
      * Creates a new Product instance.
-     * @param {string} name - The name of the product.
-     * @param {number} quantity - The quantity of the product.
-     * @param {number} price - The price of the product.
-     * @param {string} productType - The type of the product.
+     * @param {string} name 
+     * @param {number} quantity 
+     * @param {number} price 
+     * @param {string} productType 
      */
     constructor(name = "", quantity = 0, price = 0.0, productType = "") {
         this.name = String(name);
@@ -46,7 +46,6 @@ class Product {
 
         return tr;
     }
-
 }
 
 /**
@@ -361,7 +360,6 @@ class Menu {
         return quantityInput;
     }
 
-
     /**
      * Creates a row containing buttons (e.g., Save and Cancel) for the menu.
      * @returns {HTMLTableRowElement} The created table row containing buttons.
@@ -461,8 +459,6 @@ class Menu {
 
         return null;
     }
-
-
 
     /**
      * Orders products by product type in the specified order.
