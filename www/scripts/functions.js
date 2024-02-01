@@ -107,6 +107,15 @@ export async function populateMenu() {
     }
 }
 
+/**
+ * Clears the menu by removing all products.
+ * @param {Object} menu - The menu object.
+ */
+export function clearMenu() {
+    menu.products = [];
+}
+
+
 
 
 

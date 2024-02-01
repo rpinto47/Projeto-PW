@@ -1,5 +1,4 @@
-import { showMenu, populateMenu } from "./functions.js";
-import { pmanager } from "./main.js";
+import { showMenu, populateMenu, clearMenu } from "./functions.js";
 import { addProduct } from "./functions.js";
 
 class ProductType {
@@ -244,7 +243,6 @@ refreshTable() {
     }
 
     this.createTableHeader(menuTable);
-    populateMenu();
 
 
     const orderedProducts = this.orderProductsByProductType();
@@ -253,6 +251,8 @@ refreshTable() {
 
     const buttonRow = this.createButtonRow();
     menuTable.appendChild(buttonRow);
+    clearMenu();
+    populateMenu();
 }
 
 

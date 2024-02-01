@@ -219,7 +219,7 @@ class ProductManager {
                     if (response) {
                         if (response.rows) {
                             this.products.push(newProduct);
-                            this.getAllProducts();
+                            menu.refreshTable();
                             return newProduct;
                         } else {
                             console.error('Error adding product to the database:', response.error || 'Unknown error');
@@ -244,7 +244,7 @@ class ProductManager {
     }
 
 
-
+    
     async deleteProduct() {
         try {
             const nameToDelete = prompt("Enter the product name to delete:");
@@ -261,8 +261,6 @@ class ProductManager {
 
                 if (response && response.rows) {
                     this.products.splice(productIndex, 1);
-                    this.getAllProducts();
-                    refreshProductsTable();
                     console.log(`Product "${nameToDelete}" deleted successfully.`);
                 } else {
                     console.error('Error deleting product from the database:', response.error);
@@ -278,54 +276,7 @@ class ProductManager {
         }
     }
 
-    async updateProduct() {
-        try {
-            const nameToUpdate = prompt("Enter the product name to update:");
-
-            if (!nameToUpdate.trim()) {
-                alert('Invalid input. Name must be a non-empty string.');
-                return null;
-            }
-
-            const productIndex = this.products.findIndex(product => product.name === nameToUpdate);
-
-            if (productIndex !== -1) {
-                const newName = prompt(`Enter the new name for ${nameToUpdate}:`) || nameToUpdate;
-                const newQuantity = parseInt(prompt(`Enter the new quantity for ${newName}:`) || this.products[productIndex].quantity);
-                const newPrice = parseFloat(prompt(`Enter the new price for ${newName}:`) || this.products[productIndex].price);
-                const newProductType = prompt(`Enter the new product type for ${newName}:`) || this.products[productIndex].productType;
-
-                const updatedProduct = new Product(newName, newQuantity, newPrice, newProductType);
-
-                let body = {
-                    name: updatedProduct.name,
-                    quantity: updatedProduct.quantity,
-                    price: updatedProduct.price,
-                    productType: updatedProduct.productType
-                };
-
-                const response = await fetchJson(`/products/${productIndex}`, "PUT", body);
-
-                if (response && response.rows) {
-                    this.products[productIndex] = updatedProduct;
-                    this.getAllProducts();
-                    refreshProductsTable();
-                    console.log(`Product "${nameToUpdate}" updated successfully.`);
-                    return updatedProduct;
-                } else {
-                    console.error('Error updating product in the database:', response.error);
-                    return null;
-                }
-            } else {
-                console.error('Product with the provided name not found.');
-                return null;
-            }
-        } catch (error) {
-            console.error('Error updating product:', error.message);
-            return null;
-        }
-    }
-
+    
     async getAllProducts() {
         try {
             const response = await fetchJson("/products/", "GET");
