@@ -1,5 +1,30 @@
-import { ProductTypes } from './enums.js';
 import { showMenu, populateMenu } from "./functions.js";
+
+
+class ProductType {
+    constructor(id, name = "New Product") {
+        this._id = id;
+        this._name = String(name);
+    }
+
+    get id() {
+        return this._id;
+    }
+
+    set id(value) {
+        this._id = value;
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    set name(value) {
+        this._name = value;
+    }
+}
+
+
 
 /**
  * Represents a product with name, quantity, price, and product type.
@@ -16,36 +41,8 @@ class Product {
         this.name = String(name);
         this.quantity = parseInt(quantity);
         this.price = parseFloat(price);
-
-        if (!ProductTypes.isValid(productType)) {
-            throw new Error(`Invalid product type: ${productType}`);
-        } else {
-            this.productType = productType;
-        }
     }
 
-    /**
-     * Converts the product to a table row element.
-     * @returns {HTMLTableRowElement} The created table row element.
-     */
-    toTr() {
-        const tr = document.createElement('tr');
-
-        const properties = ['name', 'quantity', 'price'];
-
-        properties.forEach(propertyName => {
-            const td = document.createElement('td');
-            td.textContent = propertyName === 'price' ? `${this[propertyName]} €` : this[propertyName];
-            tr.appendChild(td);
-        });
-
-        const hiddenIdCell = document.createElement('td');
-        hiddenIdCell.style.display = 'none';
-        hiddenIdCell.textContent = `${this.name}-${this.productType}`;
-        tr.appendChild(hiddenIdCell);
-
-        return tr;
-    }
 }
 
 /**
@@ -596,13 +593,13 @@ class Menu {
             const price = parseFloat(priceString);
 
             if (!isNaN(price) && price >= 0) {
-                
+
                 const newProduct = new Product(productName, 0, price, productType);
 
-                
+
                 this.addProduct(newProduct);
                 showMenu();
-                
+
                 alert('Product added successfully!');
 
             } else {
@@ -740,7 +737,7 @@ class Table {
      */
     createProductRow(product, index) {
         const row = document.createElement('tr');
-        row.dataset.index = index; 
+        row.dataset.index = index;
         row.classList.add('product-row', 'selectable');
 
         ['name', 'quantity', 'price'].forEach(propertyName => {
@@ -847,7 +844,7 @@ class Table {
 
             const totalCell = document.createElement('td');
             totalCell.textContent = 'Total';
-            totalCell.colSpan = 2; 
+            totalCell.colSpan = 2;
             totalRow.appendChild(totalCell);
 
             const totalAmountCell = document.createElement('td');
@@ -993,4 +990,4 @@ class Table {
 }
 
 
-export { Product, TableOrder, Menu, Table, menu };
+export { ProductType, Product, TableOrder, Menu, Table, menu };

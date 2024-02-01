@@ -152,85 +152,84 @@ function hideElements() {
     }
 }
 
-/*---------------------------------------------------------------- Product Types ----------------------------------------------------------------
+/*---------------------------------------------------------------- Product Types ----------------------------------------------------------------*/
+
 /**
- * Fetch product data from the JSON database.
- * @param {string|null} id - Optional ID to include in the URL.
- * @returns {Promise<Array>} A promise that resolves with an array of product data.
+ * Add a new value to the product types enumeration and refresh the product types table.
  */
-async function fetchProductTypesData(id = null) {
-    try {
-        const url = id ? `http://localhost:3000/product-types/${id}` : 'http://localhost:3000/product-types';
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch product data');
-        }
-        
-        const productData = await response.json();
-        return productData;
-    } catch (error) {
-        console.error('Error fetching product data:', error.message);
-        throw error;
-    }
+async function addProductType() {
+    await ptmanager.addProductType();
 }
 
 /**
- * Get product types from the JSON database.
- * @param {string|null} id - Optional ID to include in the URL.
- * @returns {Promise<Enumerate>} A promise that resolves with an Enumerate instance.
+ * Delete a value from the product types enumeration and refresh the product types table.
  */
-async function getProductTypes(id = null) {
-    try {
-        const productData = await fetchProductTypesData(id);
-        const productTypes = new Enumerate(...productData.map(product => product.type));
-        return productTypes;
-    } catch (error) {
-        console.error('Error getting product types:', error.message);
-        throw error;
-    }
+async function deleteProductType() {
+    await ptmanager.deleteProductType();
+}
+
+
+/**
+ * Create a table for displaying product types.
+ * @param {ProductType[]} productTypes - Array of ProductType objects.
+ * @returns {HTMLTableElement} The HTML table element.
+ */
+export function createProductTypesTable(productTypes) {
+    const productTypeNames = productTypes.map(productType => productType._name);
+    console.log(productTypeNames);
+    const table = document.createElement("table");
+    table.classList.add("product-types-table");
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const headerCell = document.createElement("th");
+    headerCell.textContent = "Product Types";
+    headerRow.appendChild(headerCell);
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    productTypeNames.forEach(productTypeName => {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.textContent = productTypeName;
+        row.appendChild(cell);
+        tbody.appendChild(row);
+    });
+
+    const actionRow = document.createElement("tr");
+    const buttonCell = document.createElement("td");
+
+    const addButton = document.createElement("button");
+    addButton.textContent = "Add";
+    addButton.addEventListener("click", addProductType);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", deleteProductType);
+
+    buttonCell.appendChild(addButton);
+    buttonCell.appendChild(deleteButton);
+
+    actionRow.appendChild(buttonCell);
+    tbody.appendChild(actionRow);
+
+    table.appendChild(tbody);
+
+    console.log("Product types table created");
+    return table;
 }
 
 /**
- * Add a new product type to the JSON database.
- * @param {string} newType - The new product type to add.
- * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ * Refresh the product types table in the UI.
  */
-async function addProductType(newType) {
-    try {
-        const response = await fetch('http://localhost:3000/product-types', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ type: newType }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to add product type');
-        }
-    } catch (error) {
-        console.error('Error adding product type:', error.message);
-        throw error;
+export function refreshProductTypesTable() {
+    const productTypesContainer = document.querySelector(".productTypes");
+    while (productTypesContainer.firstChild) {
+        productTypesContainer.removeChild(productTypesContainer.firstChild);
     }
-}
 
-/**
- * Delete a product type from the JSON database.
- * @param {string} typeToDelete - The product type to delete.
- * @returns {Promise<void>} A promise that resolves when the operation is complete.
- */
-async function deleteProductType(typeToDelete) {
-    try {
-        const response = await fetch(`http://localhost:3000/product-types?type=${typeToDelete}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete product type');
-        }
-    } catch (error) {
-        console.error('Error deleting product type:', error.message);
-        throw error;
-    }
+    const productTypesTable = createProductTypesTable(ptmanager.productTypes);
+    productTypesContainer.appendChild(productTypesTable);
 }

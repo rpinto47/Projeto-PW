@@ -38,7 +38,7 @@ app.put("/order-items/:table", putOrderItemsRoute);
 /*----------- Products -------------*/
 app.delete("/product-types/:id", deleteProductTypesRoute);
 app.delete("/products/:id", deleteProductsRoute);
-app.get("/product-types/:id?", getProductTypesRoute);
+app.get("/product-types/", getProductTypesRoute);
 app.get("/products/:id?", getProductsRoute);
 app.post("/product-types", postProductTypesRoute);
 app.post("/products", postProductsRoute);
@@ -50,6 +50,6 @@ app.get("/tables", getTablesRoute);
 app.put("/tables/:id", putTablesRoute);
 
 // Server Initialization
-app.listen(3000, function () {
-  console.log("Server running at http://localhost:3000");
+app.listen(5500, function () {
+  console.log("Server running at http://localhost:5500");
 });
