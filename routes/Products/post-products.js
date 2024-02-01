@@ -13,12 +13,15 @@ const query = require("../../scripts/query");
  */
 module.exports = async function postProduct(req, res) {
   try {
+    const name = req.body.name ;
     const quantity = req.body.quantity;
     const price = req.body.price;
+    const ptype = req.body.productType;
 
-    console.log("Received request to add product:", { quantity, price });
+    console.log("Received request to add product:", { name, quantity, price });
+    console.log("Nome", { name });
 
-    if (quantity !== undefined && price !== undefined) {
+    if (name !== undefined && quantity !== undefined && price !== undefined) {
       // Validate quantity and price as numeric values
       if (isNaN(quantity) || isNaN(price)) {
         console.error("Invalid quantity or price. Quantity:", quantity, ", Price:", price);
@@ -27,16 +30,16 @@ module.exports = async function postProduct(req, res) {
 
       // Perform data insertion
       const rows = await query(`
-        INSERT INTO Product (Quantity, Price)
-        VALUES (?, ?);
-      `, [quantity || null, price || null]);
+        INSERT INTO Product (Name, Quantity, Price, ProductTypeID)
+        VALUES (?, ?, ?, (SELECT ProductTypeID FROM ProductType WHERE TypeName=?));
+      `, [name , quantity || null, price || null, ptype || null]);
 
       console.log("Product added successfully. Rows:", rows);
 
       res.json({ message: 'Product added successfully.', rows });
     } else {
-      console.error("Missing required fields. Ensure quantity and price are provided.");
-      res.status(400).json({ error: 'Missing required fields. Ensure quantity and price are provided.' });
+      console.error("Missing required fields. Ensure name, quantity, and price are provided.");
+      res.status(400).json({ error: 'Missing required fields. Ensure name, quantity, and price are provided.' });
     }
   } catch (error) {
     console.error("Error occurred:", error);

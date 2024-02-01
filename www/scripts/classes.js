@@ -1,5 +1,6 @@
 import { showMenu, populateMenu } from "./functions.js";
-
+import { pmanager } from "./main.js";
+import { addProduct } from "./functions.js";
 
 class ProductType {
     constructor(id, name = "New Product") {
@@ -32,17 +33,64 @@ class ProductType {
 class Product {
     /**
      * Creates a new Product instance.
+     * @param {string} id 
      * @param {string} name 
      * @param {number} quantity 
      * @param {number} price 
      * @param {string} productType 
      */
-    constructor(name = "", quantity = 0, price = 0.0, productType = "") {
-        this.name = String(name);
-        this.quantity = parseInt(quantity);
-        this.price = parseFloat(price);
+    constructor(id = "", name = "", quantity = 0, price = 0.0, productType = "") {
+        this._id = String(id);
+        this._name = String(name);
+        this._quantity = parseInt(quantity);
+        this._price = parseFloat(price);
+        this._productType = String(productType);
     }
 
+    // Getter and setter for id
+    get id() {
+        return this._id;
+    }
+
+    set id(newId) {
+        this._id = String(newId);
+    }
+
+    // Getter and setter for name
+    get name() {
+        return this._name;
+    }
+
+    set name(newName) {
+        this._name = String(newName);
+    }
+
+    // Getter and setter for quantity
+    get quantity() {
+        return this._quantity;
+    }
+
+    set quantity(newQuantity) {
+        this._quantity = parseInt(newQuantity);
+    }
+
+    // Getter and setter for price
+    get price() {
+        return this._price;
+    }
+
+    set price(newPrice) {
+        this._price = parseFloat(newPrice);
+    }
+
+    // Getter and setter for productType
+    get productType() {
+        return this._productType;
+    }
+
+    set productType(newProductType) {
+        this._productType = String(newProductType);
+    }
 }
 
 /**
@@ -179,6 +227,33 @@ class Menu {
     isDisplayed() {
         return this.menuDisplayed;
     }
+
+    /**
+ * Refreshes the displayed menu table based on the current state of the products array.
+ */
+refreshTable() {
+    const menuTable = document.querySelector('.menu-table');
+
+    if (!menuTable) {
+        console.error('Menu table not found.');
+        return;
+    }
+
+    while (menuTable.firstChild) {
+        menuTable.removeChild(menuTable.firstChild);
+    }
+
+    this.createTableHeader(menuTable);
+    populateMenu();
+
+
+    const orderedProducts = this.orderProductsByProductType();
+    const tableBody = this.createTableBody(orderedProducts);
+    menuTable.appendChild(tableBody);
+
+    const buttonRow = this.createButtonRow();
+    menuTable.appendChild(buttonRow);
+}
 
 
     /**
@@ -524,7 +599,7 @@ class Menu {
 
         const buttonLabels = ['Add', 'Remove', 'Edit'];
         const buttonActions = [
-            () => this.addProductByPrompt(),
+            addProduct,
             () => this.removeSelectedFromMenu(),
             () => this.editSelectedFromMenu()
         ];
@@ -665,10 +740,8 @@ class Menu {
     }
 
 }
-
-
 const menu = new Menu()
-populateMenu(menu);
+
 /**
  * Represents a table with associated products and order details.
  */

@@ -1,8 +1,12 @@
-import { addTables, showTables, showMenu, showProductTypesTable } from "./functions.js";
-import { ProductTypeManager } from "./managers.js";
+import { addTables, showTables, showMenu, showProductTypesTable, populateMenu } from "./functions.js";
+import { ProductManager, ProductTypeManager } from "./managers.js";
 import { createProductTypesTable } from "./functions.js";
 const ptmanager= new ProductTypeManager();
+const pmanager = new ProductManager();
 
+
+setTimeout(() => {populateMenu();
+}, 500);
 
 const tablesDiv = document.querySelector(".tables");
 const addButton = document.createElement("button");
@@ -16,11 +20,8 @@ document.querySelector(".tableOrder").style.display = "none";
 document.querySelector(".menu").style.display = "none";
 document.querySelector(".productTypes").style.display = "none";
 
-console.log("get all product types",ptmanager.getAllProductTypes());
-console.log(ptmanager.productTypes);
 
 
-// Wait for 3 seconds
 setTimeout(() => {
     const productTypesTable = createProductTypesTable(ptmanager.productTypes);
     const productTypesContainer = document.querySelector(".productTypes");
@@ -32,4 +33,4 @@ document.getElementById("menuButton").addEventListener("click", showMenu);
 document.getElementById("productTypesButton").addEventListener("click", showProductTypesTable);
 
 
-export { ptmanager };
+export { ptmanager, pmanager };

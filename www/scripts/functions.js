@@ -1,5 +1,5 @@
-import { Product, Table, menu } from "./classes.js";
-import { ptmanager } from "./main.js";
+import { Table, menu } from "./classes.js";
+import { ptmanager, pmanager } from "./main.js";
 
 /**
  * Adds tables based on user input.
@@ -86,47 +86,29 @@ export function showProductTypesTable() {
     productTypesContainer.style.display = "block";
 }
 
-/** 	
- * Populates the menu with predefined product data.
+/**
+ * Populates the menu with product data obtained from the ProductManager.
  * @param {Object} menu - The menu object.
+ * @param {ProductManager} productManager - The ProductManager instance.
  */
-export function populateMenu(menu) {
-    let productsData = [
-        ["Caesar Salad", 1, 8.99, "Entrada"],
-        ["Caesar Salad", 1, 8.99, "Entrada"],
-        ["Caprese Salad", 1, 9.99, "Entrada"],
-        ["Bruschetta", 1, 7.49, "Entrada"],
-        ["Margherita Pizza", 1, 12.99, "Prato"],
-        ["Penne alla Vodka", 1, 10.99, "Prato"],
-        ["Grilled Chicken Sandwich", 1, 9.99, "Prato"],
-        ["Chocolate Brownie", 1, 5.99, "Sobremesa"],
-        ["Tiramisu", 1, 7.99, "Sobremesa"],
-        ["Cheesecake", 1, 8.49, "Sobremesa"],
-        ["Coca-Cola", 1, 2.49, "Bebida"],
-        ["Orange Juice", 1, 3.29, "Bebida"],
-        ["Iced Tea", 1, 2.99, "Bebida"],
-        ["Chicken Alfredo", 1, 11.99, "Prato"],
-        ["Mango Sorbet", 1, 4.99, "Sobremesa"],
-        ["Minestrone Soup", 1, 6.49, "Entrada"],
-        ["Salmon Fillet", 1, 15.99, "Prato"],
-        ["Tropical Smoothie", 1, 4.49, "Bebida"],
-        ["New York Cheesecake", 1, 9.99, "Sobremesa"],
-        ["Vegetable Spring Rolls", 1, 8.49, "Entrada"],
-        ["BBQ Chicken Pizza", 1, 13.99, "Prato"],
-        ["Pineapple Upside-Down Cake", 1, 7.49, "Sobremesa"],
-        ["Iced Cappuccino", 1, 3.99, "Bebida"],
-        ["Greek Salad", 1, 9.49, "Entrada"],
-        ["Shrimp Scampi", 1, 14.99, "Prato"],
-        ["Triple Chocolate Mousse", 1, 10.99, "Sobremesa"],
-        ["Green Tea", 1, 2.79, "Bebida"]
-    ];
-
-    for (let data of productsData) {
-        let [name, quantity, price, productType] = data;
-        let product = new Product(name, quantity, price, productType);
-        menu.addProduct(product);
+export async function populateMenu() {
+    try {
+        const products = pmanager.products;
+        console.log("Loading products", products);
+        if (products && products.length > 0) {
+            for (let product of products) {
+                menu.addProduct(product);
+            }
+        } else {
+            console.error('No products available.');
+        }
+    } catch (error) {
+        console.error('Error populating menu:', error.message);
     }
 }
+
+
+
 
 /**
  * Hides various UI elements.
@@ -234,3 +216,13 @@ export function refreshProductTypesTable() {
     const productTypesTable = createProductTypesTable(ptmanager.productTypes);
     productTypesContainer.appendChild(productTypesTable);
 }
+
+/*---------------------------------------------------------------- Product Types ----------------------------------------------------------------*/
+/**
+ * Add a new product and refresh the menu table.
+ */
+export async function addProduct() {
+    await pmanager.addProduct();
+    menu.refreshTable();
+}
+
