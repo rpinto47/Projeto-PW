@@ -1,3 +1,4 @@
+
 async function fetchJson(url, method, body) {
     var options = {
         headers: {
@@ -11,21 +12,8 @@ async function fetchJson(url, method, body) {
     } else {
         options.method = method || "GET";
     }
-
-    try {
-        let response = await fetch(url, options);
-        console.log("Response:", response);
-        
-        if (response.ok) {
-            return await response.json();
-        } else {
-            console.error('Error: Response not OK. Status:', response.status);
-            return null;
-        }
-    } catch (error) {
-        console.error('Error in fetchJson:', error.message);
-        return null;
-    }
+    let response = await fetch(url, options);
+    return response.ok ? await response.json() : void 0; 
 }
 
-export { fetchJson };
+export {fetchJson};
