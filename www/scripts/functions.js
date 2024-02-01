@@ -1,4 +1,5 @@
 import { Product, Table, menu } from "./classes.js";
+import { ptmanager } from "./main.js";
 
 /**
  * Adds tables based on user input.

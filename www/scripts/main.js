@@ -25,7 +25,7 @@ setTimeout(() => {
     const productTypesTable = createProductTypesTable(ptmanager.productTypes);
     const productTypesContainer = document.querySelector(".productTypes");
     productTypesContainer.appendChild(productTypesTable);
-}, 50);
+}, 500);
 
 document.getElementById("tablesButton").addEventListener("click", showTables);
 document.getElementById("menuButton").addEventListener("click", showMenu);

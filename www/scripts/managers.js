@@ -1,4 +1,4 @@
-import { fetchJson } from "../../scripts/fetchJson.js";
+import { fetchJson } from "./fetchJson.js";
 import { refreshProductTypesTable } from "./functions.js";
 import { ProductType } from "./classes.js";
 
