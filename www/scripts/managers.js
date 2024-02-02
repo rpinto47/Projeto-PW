@@ -2,12 +2,30 @@ import { fetchJson } from "./fetchJson.js";
 import { refreshProductTypesTable } from "./functions.js";
 import { ProductType, Product, menu, Table } from "./classes.js";
 
+/**
+ * Class representing a manager for handling product types.
+ * @class
+ */
 class ProductTypeManager {
+    /**
+     * Creates an instance of ProductTypeManager.
+     * @constructor
+     */
     constructor() {
+        /**
+         * An array containing product type objects.
+         * @type {Array<Object>}
+         * @private
+         */
         this.productTypes = [];
         this.getAllProductTypes();
     }
-
+    
+     /**
+     * Asynchronously adds a new product type.
+     * @async
+     * @returns {Promise<ProductType|null>} A promise that resolves to the newly added ProductType object, or null if the operation fails.
+     */
     async addProductType() {
         try {
             const name = prompt("Enter the product type name:") || "New Product";
@@ -57,7 +75,11 @@ class ProductTypeManager {
         }
     }
     
-
+    /**
+     * Asynchronously deletes a product type by name.
+     * @async
+     * @returns {Promise<null>} A promise that resolves to null if the operation is successful, or an error message if it fails.
+     */
     async deleteProductType() {
         try {
             const nameToDelete = prompt("Enter the product type name to delete:");
@@ -90,7 +112,12 @@ class ProductTypeManager {
             return null;
         }
     }
-
+    
+    /**
+     * Asynchronously updates a product type by name.
+     * @async
+     * @returns {Promise<ProductType|null>} A promise that resolves to the updated ProductType object, or null if the operation fails.
+     */
     async updateProductType() {
         try {
             const nameToUpdate = prompt("Enter the product type name to update:");
@@ -144,7 +171,12 @@ class ProductTypeManager {
         }
     }
     
-
+    
+    /**
+     * Asynchronously retrieves all product types from the server.
+     * @async
+     * @returns {Promise<Array<ProductType>|null>} A promise that resolves to an array of ProductType objects if the operation is successful, or null if it fails.
+     */
     async getAllProductTypes() {
         try {
             const response = await fetchJson("/product-types/", "GET");
@@ -174,7 +206,13 @@ class ProductTypeManager {
             return null;
         }
     }
-
+    
+    /**
+     * Asynchronously retrieves the unique identifier of a product type by its name.
+     * @async
+     * @param {string} name - The name of the product type.
+     * @returns {Promise<number|null>} A promise that resolves to the unique identifier if the product type is found, or null if it is not found or if an error occurs.
+     */
     async getIdByName(name) {
         try {
             const foundType = this.productTypes.find(type => type.name === name);
@@ -192,13 +230,30 @@ class ProductTypeManager {
 }
 
 
-
+/**
+ * Class representing a manager for handling products.
+ * @class
+ */
 class ProductManager {
+    /**
+     * Creates an instance of ProductManager.
+     * @constructor
+     */
     constructor() {
+        /**
+         * An array containing product objects.
+         * @type {Array<Object>}
+         * @private
+         */
         this.products = [];
         this.getAllProducts();
     }
-
+    
+     /**
+     * Asynchronously adds a new product.
+     * @async
+     * @returns {Promise<Product|null>} A promise that resolves to the newly added Product object, or null if the operation fails.
+     */
     async addProduct() {
         try {
             const name = prompt("Enter the product name:") || "New Product";
@@ -262,8 +317,12 @@ class ProductManager {
         }
     }
     
-
-    
+    /**
+     * Asynchronously deletes a product by name.
+     * @async
+     * @param {string} nameToDelete - The name of the product to delete.
+     * @returns {Promise<null>} A promise that resolves to null if the operation is successful, or an error message if it fails.
+     */
     async deleteProduct(nameToDelete) {
         console.log("Product name to delete:", nameToDelete);
     
@@ -299,8 +358,12 @@ class ProductManager {
         }
     }
 
-
-
+    /**
+     * Asynchronously updates a product by name.
+     * @async
+     * @param {string} nameToUpdate - The name of the product to update.
+     * @returns {Promise<Product|null>} A promise that resolves to the updated Product object, or null if the operation fails.
+     */
     async updateProduct(nameToUpdate) {
         console.log("Product name to update:", nameToUpdate);
     
@@ -367,8 +430,11 @@ class ProductManager {
         }
     }
     
-    
-    
+    /**
+     * Asynchronously retrieves all products from the server.
+     * @async
+     * @returns {Promise<Array<Product>|null>} A promise that resolves to an array of Product objects if the operation is successful, or null if it fails.
+     */ 
     async getAllProducts() {
         try {
             const response = await fetchJson("/products/", "GET");
@@ -405,7 +471,12 @@ class ProductManager {
         }
     }
     
-
+    /**
+     * Asynchronously retrieves the unique identifier of a product by its name.
+     * @async
+     * @param {string} name - The name of the product.
+     * @returns {Promise<number|null>} A promise that resolves to the unique identifier if the product is found, or null if it is not found or if an error occurs.
+     */
     async getIdByName(name) {
         try {
             const foundProduct = this.products.find(product => product.name === name);
@@ -424,8 +495,21 @@ class ProductManager {
 
 
 
+/**
+ * Class representing a manager for handling tables.
+ * @class
+ */
 class TableManager {
+    /**
+     * Creates an instance of TableManager.
+     * @constructor
+     */
     constructor() {
+        /**
+         * An array containing table objects.
+         * @type {Array<Object>}
+         * @private
+         */
         this.tables = [];
         this.getTables();
     }

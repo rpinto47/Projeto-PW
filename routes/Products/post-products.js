@@ -22,13 +22,12 @@ module.exports = async function postProduct(req, res) {
     console.log("Nome", { name });
 
     if (name !== undefined && quantity !== undefined && price !== undefined) {
-      // Validate quantity and price as numeric values
+      
       if (isNaN(quantity) || isNaN(price)) {
         console.error("Invalid quantity or price. Quantity:", quantity, ", Price:", price);
         return res.status(400).json({ error: 'Quantity and price must be numeric values.' });
       }
 
-      // Perform data insertion
       const rows = await query(`
         INSERT INTO Product (Name, Quantity, Price, ProductTypeID)
         VALUES (?, ?, ?, (SELECT ProductTypeID FROM ProductType WHERE TypeName=?));
