@@ -9,12 +9,14 @@ const query = require('../../scripts/query');
  */
 module.exports = async function deleteProduct(req, res) {
   try {
+    const productId = req.params.id;
+    console.log("Deleting product from ProductType table with ID:", productId);
     const deleteProductQuery = `
       DELETE FROM Product
       WHERE ProductID = ?;
     `;
 
-    console.log("Deleting product from ProductType table with ID:", productId);
+  
 
     const result = await query(deleteProductQuery, [productId]);
 
