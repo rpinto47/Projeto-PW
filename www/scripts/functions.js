@@ -107,6 +107,15 @@ export async function populateMenu() {
     }
 }
 
+/**
+ * Clears the menu by removing all products.
+ * @param {Object} menu - The menu object.
+ */
+export function clearMenu() {
+    menu.products = [];
+}
+
+
 
 
 
@@ -223,6 +232,22 @@ export function refreshProductTypesTable() {
  */
 export async function addProduct() {
     await pmanager.addProduct();
+    menu.refreshTable();
+}
+
+/**
+ * Add a new product and refresh the menu table.
+ */
+export async function deleteProduct(name) {
+    await pmanager.deleteProduct(name);
+    menu.refreshTable();
+}
+
+/**
+ * Add a new product and refresh the menu table.
+ */
+export async function editProduct(name) {
+    await pmanager.updateProduct(name);
     menu.refreshTable();
 }
 
