@@ -1,4 +1,4 @@
-import { addTables, showTables, showMenu, showProductTypesTable, populateMenu } from "./functions.js";
+import { showTables, showMenu, showProductTypesTable, populateMenu } from "./functions.js";
 import { ProductManager, ProductTypeManager, TableManager } from "./managers.js";
 import { createProductTypesTable } from "./functions.js";
 const ptmanager= new ProductTypeManager();
