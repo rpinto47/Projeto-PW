@@ -428,7 +428,6 @@ refreshTable() {
     createQuantityInput() {
         const quantityInput = document.createElement('input');
         quantityInput.type = 'number';
-        quantityInput.min = 1;
         return quantityInput;
     }
 
@@ -950,14 +949,14 @@ class Table {
         let productExists = false;
 
         for (const existingProduct of this.products) {
-            if (existingProduct.name === product.name) {
+            if (existingProduct.name === product._name) {
                 productExists = true;
 
 
                 existingProduct.quantity += quantity;
 
 
-                existingProduct.price = existingProduct.quantity * product.price;
+                existingProduct.price = existingProduct.quantity * product._price;
 
 
                 console.log('Updated existing product in the table:', existingProduct);
@@ -968,9 +967,9 @@ class Table {
 
         if (!productExists) {
 
-            this.products.push({ name: product.name, quantity, price: quantity * product.price });
+            this.products.push({ name: product._name, quantity, price: quantity * product._price });
 
-            console.log('Added new product to the table:', { name: product.name, quantity, price: quantity * product.price });
+            console.log('Added new product to the table:', { name: product._name, quantity, price: quantity * product._price });
         }
         this.updateDetailsWithoutClosing();
     }
