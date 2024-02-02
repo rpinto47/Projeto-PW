@@ -235,3 +235,19 @@ export async function addProduct() {
     menu.refreshTable();
 }
 
+/**
+ * Add a new product and refresh the menu table.
+ */
+export async function deleteProduct(name) {
+    await pmanager.deleteProduct(name);
+    menu.refreshTable();
+}
+
+/**
+ * Add a new product and refresh the menu table.
+ */
+export async function editProduct(name) {
+    await pmanager.updateProduct(name);
+    menu.refreshTable();
+}
+

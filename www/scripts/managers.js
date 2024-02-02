@@ -207,11 +207,11 @@ class ProductManager {
                     const newProduct = new Product(newId, name, quantity, price, productType);
 
                     let body = {
-                        id: newProduct.id,
-                        name: newProduct.name,
-                        quantity: newProduct.quantity,
-                        price: newProduct.price,
-                        productType: newProduct.productType
+                        id: newProduct._id,
+                        name: newProduct._name,
+                        quantity: newProduct._quantity,
+                        price: newProduct._price,
+                        productType: newProduct._productType
                     };
 
                     const response = await fetchJson("/products/", "POST", body);
@@ -245,23 +245,27 @@ class ProductManager {
 
 
     
-    async deleteProduct() {
+    async deleteProduct(nameToDelete) {
+        console.log("Product name to delete:", nameToDelete);
+    
         try {
-            const nameToDelete = prompt("Enter the product name to delete:");
-
-            if (!nameToDelete.trim()) {
+            if (!nameToDelete || !nameToDelete.trim()) {
                 alert('Invalid input. Name must be a non-empty string.');
                 return null;
             }
-
-            const productIndex = this.products.findIndex(product => product.name === nameToDelete);
-
-            if (productIndex !== -1) {
-                const response = await fetchJson(`/products/${productIndex}`, "DELETE");
-
-                if (response && response.rows) {
-                    this.products.splice(productIndex, 1);
+    
+            const productToDelete = this.products.find(product => product._name === nameToDelete);
+            console.log('Product to delete:', productToDelete._id);
+            if (productToDelete) {
+                const response = await fetchJson(`/products/${productToDelete._id}`, "DELETE");
+    
+                console.log("Response from the server:", response);
+    
+                if (response) {
+                    this.products = this.products.filter(product => product._id !== productToDelete._id);
                     console.log(`Product "${nameToDelete}" deleted successfully.`);
+                    menu.refreshTable();
+                    alert('Successfully deleted');
                 } else {
                     console.error('Error deleting product from the database:', response.error);
                     return null;
@@ -276,12 +280,72 @@ class ProductManager {
         }
     }
 
+
+
+    async updateProduct(nameToUpdate) {
+        console.log("Product name to update:", nameToUpdate);
+
+        try {
+            if (!nameToUpdate || !nameToUpdate.trim()) {
+                alert('Invalid input. Name must be a non-empty string.');
+                return null;
+            }
+
+            const productToUpdate = this.products.find(product => product._name === nameToUpdate);
+
+            if (productToUpdate) {
+                const updatedName = prompt("Enter the updated product name:") || productToUpdate._name;
+                const updatedQuantity = parseInt(prompt("Enter the updated quantity:") || productToUpdate._quantity, 10);
+                const updatedPrice = parseFloat(prompt("Enter the updated price:") || productToUpdate._price);
+                const updatedProductType = prompt("Enter the updated product type:") || productToUpdate._productType;
+
+                if (!isNaN(updatedQuantity) && !isNaN(updatedPrice)) {
+                    const body = {
+                        id: productToUpdate._id,
+                        name: updatedName,
+                        quantity: updatedQuantity,
+                        price: updatedPrice,
+                        productType: updatedProductType
+                    };
+
+                    const response = await fetchJson(`/products/${productToUpdate._id}`, "PUT", body);
+
+                    console.log("Response from the server:", response);
+
+                    if (response && response.rows) {
+                        productToUpdate._name = updatedName;
+                        productToUpdate._quantity = updatedQuantity;
+                        productToUpdate._price = updatedPrice;
+                        productToUpdate._productType = updatedProductType;
+
+                        console.log(`Product "${nameToUpdate}" updated successfully.`);
+                        menu.refreshTable();
+                        alert('Successfully updated');
+                        return productToUpdate;
+                    } else {
+                        console.error('Error updating product in the database:', response.error);
+                        return null;
+                    }
+                } else {
+                    alert('Invalid input. Quantity and price must be valid numbers.');
+                    return null;
+                }
+            } else {
+                console.error('Product with the provided name not found.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error updating product:', error.message);
+            return null;
+        }
+    }
+    
     
     async getAllProducts() {
         try {
             const response = await fetchJson("/products/", "GET");
-            console.log("resposta produtos", response);
-
+            console.log("Response from the database:", response);
+    
             if (response) {
                 if (response.rows) {
                     let aux = [];
@@ -295,9 +359,9 @@ class ProductManager {
                         );
                         aux.push(newProduct);
                     }
-                    console.log("Product aux", aux);
+                    console.log("Products from the database:", aux);
                     this.products = aux;
-                    console.log("products aux", aux);
+                    console.log("Updated products array:", aux);
                     return this.products;
                 } else {
                     console.error('Error: Response does not contain "rows" property:', response);
@@ -312,6 +376,7 @@ class ProductManager {
             return null;
         }
     }
+    
 
     async getIdByName(name) {
         try {

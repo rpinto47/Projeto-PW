@@ -1,4 +1,4 @@
-import { showMenu, populateMenu, clearMenu } from "./functions.js";
+import { showMenu, populateMenu, clearMenu, deleteProduct, editProduct } from "./functions.js";
 import { addProduct } from "./functions.js";
 
 class ProductType {
@@ -47,43 +47,43 @@ class Product {
     }
 
     // Getter and setter for id
-    get id() {
+    getid() {
         return this._id;
     }
 
-    set id(newId) {
+    setid(newId) {
         this._id = String(newId);
     }
 
     // Getter and setter for name
-    get name() {
+    getname() {
         return this._name;
     }
 
-    set name(newName) {
+    setname(newName) {
         this._name = String(newName);
     }
 
     // Getter and setter for quantity
-    get quantity() {
+    getquantity() {
         return this._quantity;
     }
 
-    set quantity(newQuantity) {
+    setquantity(newQuantity) {
         this._quantity = parseInt(newQuantity);
     }
 
     // Getter and setter for price
-    get price() {
+    getprice() {
         return this._price;
     }
 
-    set price(newPrice) {
+    setprice(newPrice) {
         this._price = parseFloat(newPrice);
     }
 
     // Getter and setter for productType
-    get productType() {
+    getproductType() {
         return this._productType;
     }
 
@@ -389,8 +389,8 @@ refreshTable() {
 
         this.products.forEach(product => {
             const option = document.createElement('option');
-            option.value = product.name;
-            option.text = `${product.name} - ${product.price} €`;
+            option.value = product.getname();
+            option.text = `${product.getname()} - ${product.getprice()} €`;
             menuSelect.add(option);
         });
 
@@ -582,7 +582,7 @@ refreshTable() {
 
         products.forEach(product => {
             const productRow = this.createTableRow(
-                [product.name, product.price, product.productType],
+                [product.getname(), product.getprice(), product.getproductType()],
                 'td'
             );
 
@@ -692,13 +692,10 @@ refreshTable() {
     removeSelectedFromMenu() {
         if (this.selectedProductRow) {
             const selectedProductName = this.selectedProductRow.cells[0].textContent;
-            const selectedProduct = this.products.find(product => product.name === selectedProductName);
 
-            if (selectedProduct) {
-                this.removeProduct(selectedProduct);
-                this.selectedProductRow.remove();
+            if (selectedProductName) {
+                deleteProduct(selectedProductName);
                 this.selectedProductRow = null;
-                alert('Product removed successfully!');
             }
         } else {
             alert('No product selected. Please select a product to remove.');
@@ -711,28 +708,9 @@ refreshTable() {
     editSelectedFromMenu() {
         if (this.selectedProductRow) {
             const selectedProductName = this.selectedProductRow.cells[0].textContent;
-            const selectedProduct = this.products.find(product => product.name === selectedProductName);
 
-            if (selectedProduct) {
-                const newProductName = prompt(`Enter the new name for ${selectedProductName}:`, selectedProduct.name);
-                const newPriceString = prompt(`Enter the new price for ${selectedProductName} (€):`, selectedProduct.price);
-                const newProductType = prompt(`Enter the new product type for ${selectedProductName}:`, selectedProduct.productType);
-
-                if (newProductName !== null && newPriceString !== null && newProductType !== null) {
-
-                    selectedProduct.name = newProductName.trim() || selectedProduct.name;
-                    selectedProduct.price = parseFloat(newPriceString.trim()) || selectedProduct.price;
-                    selectedProduct.productType = newProductType.trim() || selectedProduct.productType;
-
-
-                    this.selectedProductRow.cells[0].textContent = selectedProduct.name;
-                    this.selectedProductRow.cells[1].textContent = selectedProduct.price.toFixed(2) + ' €';
-                    this.selectedProductRow.cells[2].textContent = selectedProduct.productType;
-
-                    alert('Product updated successfully!');
-                } else {
-                    alert('Invalid input. Please enter valid values.');
-                }
+            if (selectedProductName) {
+                editProduct(selectedProductName);
             }
         } else {
             alert('No product selected. Please select a product to edit.');
