@@ -1,28 +1,24 @@
 import { Table, menu } from "./classes.js";
-import { ptmanager, pmanager } from "./main.js";
+import { ptmanager, pmanager, tmanager } from "./main.js";
 
 /**
- * Adds tables based on user input.
+ * Adds tables based on the information in the tmanager.tables array.
  */
 export function addTables() {
-    const input = prompt("Enter the number of tables you want:", "20");
-    if (input !== null) {
-        const numTables = parseInt(input);
-        if (!isNaN(numTables) && numTables > 0) {
-            const tablesDiv = document.querySelector(".tables");
-            const addButton = document.querySelector(".add-tables-button");
+    const tablesDiv = document.querySelector(".tables");
 
-            tablesDiv.style.display = "flex";
-            addButton.style.display = "none";
+    if (tmanager && Array.isArray(tmanager.tables) && tmanager.tables.length > 0) {
+        tablesDiv.style.display = "flex";
+        addButton.style.display = "none";
 
-            for (let i = 1; i <= numTables; i++) {
-                new Table(i);
-            }
-        } else {
-            alert("Invalid input. Please enter a positive integer.");
-        }
+        tmanager.tables.forEach(tableInfo => {
+            new Table(tableInfo.number);
+        });
+    } else {
+        alert("No tables available to add.");
     }
 }
+
 
 /**
  * Shows or hides the tables based on their current display state.
@@ -50,8 +46,6 @@ export function showTables() {
  */
 export function showMenu() {
     const menuElement = document.querySelector(".menu");
-    const tablesDiv = document.querySelector(".tables");
-    const tableOrderDiv = document.querySelector(".tableOrder");
 
     hideElements();
 

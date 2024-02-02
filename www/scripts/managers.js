@@ -1,6 +1,6 @@
 import { fetchJson } from "./fetchJson.js";
 import { refreshProductTypesTable } from "./functions.js";
-import { ProductType, Product, menu } from "./classes.js";
+import { ProductType, Product, menu, Table } from "./classes.js";
 
 class ProductTypeManager {
     constructor() {
@@ -395,4 +395,52 @@ class ProductManager {
 }
 
 
-export { ProductTypeManager, ProductManager };
+
+class TableManager {
+    constructor() {
+        this.tables = [];
+        this.getTables();
+    }
+
+     /**
+     * Retrieves all tables from the server and updates the TableManager.
+     * @returns {Table[]|null} An array of tables or null if an error occurs.
+     */
+     async getTables() {
+        try {
+            const response = await fetchJson("/tables/", "GET"); // Replace "/tables/" with your actual endpoint
+
+            console.log("Response from the server:", response);
+
+            if (response) {
+                if (response.rows) {
+                    let aux = [];
+                    for (let table of response.rows) {
+                        const newTable = new Table(
+                            table.MesaID
+                        );
+                            console.log("New Table:", newTable)
+
+                        aux.push(newTable);
+                    }
+
+                    console.log("Tables from the server:", aux);
+
+                    this.tables = aux;
+                } else {
+                    console.error('Error: Response does not contain "rows" property:', response);
+                    return null;
+                }
+            } else {
+                console.error('Error: No response received from the server.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching tables:', error.message);
+            return null;
+        }
+    }
+}
+
+
+export { ProductTypeManager, ProductManager, TableManager };
