@@ -327,7 +327,7 @@ class ProductManager {
         console.log("Product name to delete:", nameToDelete);
     
         try {
-            if (!nameToDelete || !nameToDelete.trim()) {
+            if (!nameToDelete) {
                 alert('Invalid input. Name must be a non-empty string.');
                 return null;
             }

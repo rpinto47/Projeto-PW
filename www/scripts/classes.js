@@ -602,51 +602,35 @@ refreshTable() {
         return menuTable;
     }
 
-        /**
-     * Creates and appends the table header for the menu table.
-     *
-     * @param {HTMLTableElement} menuTable - The HTML table element to which the header will be appended.
-     */
     createTableHeader(menuTable) {
         const tableHeader = document.createElement('thead');
         tableHeader.style.backgroundColor = 'lightblue';
         tableHeader.style.color = '#ff0000';
 
         const headers = ['Produto', 'Preço (€)', 'Tipo'];
-        const headerRow = createTableRow(headers, 'th');
+        const headerRow = this.createTableRow(headers, 'th');
 
         tableHeader.appendChild(headerRow);
         menuTable.appendChild(tableHeader);
     }
 
-    /**
-     * Creates and returns the table body for the menu table.
-     *
-     * @param {Array<Product>} products - An array of Product objects representing menu items.
-     * @returns {HTMLTableSectionElement} The HTML table body element.
-     */
     createTableBody(products) {
         const tableBody = document.createElement('tbody');
         tableBody.style.backgroundColor = 'white';
 
         products.forEach(product => {
-            const productRow = createTableRow(
-                [product.getName(), product.getPrice(), product.getProductType()],
+            const productRow = this.createTableRow(
+                [product.getname(), product.getprice(), product.getproductType()],
                 'td'
             );
 
-            productRow.addEventListener('click', () => toggleRowSelection(productRow));
+            productRow.addEventListener('click', () => this.toggleRowSelection(productRow));
             tableBody.appendChild(productRow);
         });
 
         return tableBody;
     }
 
-    /**
-     * Creates and returns a table row containing buttons for adding, removing, and editing menu items.
-     *
-     * @returns {HTMLTableRowElement} The HTML table row element with buttons.
-     */
     createButtonRow() {
         const buttonRow = document.createElement('tr');
         buttonRow.className = 'btnRow-menu';
@@ -654,13 +638,13 @@ refreshTable() {
         const buttonLabels = ['Add', 'Remove', 'Edit'];
         const buttonActions = [
             addProduct,
-            () => removeSelectedFromMenu(),
-            () => editSelectedFromMenu()
+            () => this.removeSelectedFromMenu(),
+            () => this.editSelectedFromMenu()
         ];
 
         buttonLabels.forEach((label, index) => {
-            const buttonCell = createTableCell('td');
-            const button = createButton(label, buttonActions[index]);
+            const buttonCell = this.createTableCell('td');
+            const button = this.createButton(label, buttonActions[index]);
             buttonCell.appendChild(button);
             buttonRow.appendChild(buttonCell);
         });
@@ -668,42 +652,22 @@ refreshTable() {
         return buttonRow;
     }
 
-    /**
-     * Creates and returns a table row for the menu table with specified data and cell type.
-     *
-     * @param {Array} data - An array of data values to populate the table row.
-     * @param {string} cellType - The type of table cell to be created ('td' for data cell, 'th' for header cell).
-     * @returns {HTMLTableRowElement} The HTML table row element with cells populated with data.
-     */
     createTableRow(data, cellType) {
         const tableRow = document.createElement('tr');
         data.forEach(value => {
-            const cell = createTableCell(cellType);
+            const cell = this.createTableCell(cellType);
             cell.textContent = (cellType === 'td' && typeof value === 'number') ? `${value.toFixed(2)} €` : value;
             tableRow.appendChild(cell);
         });
         return tableRow;
     }
 
-    /**
-     * Creates and returns a table cell of the specified type.
-     *
-     * @param {string} cellType - The type of table cell to be created ('td' for data cell, 'th' for header cell).
-     * @returns {HTMLTableCellElement} The HTML table cell element.
-     */
     createTableCell(cellType) {
         const cell = document.createElement(cellType);
         cell.classList.add(`menu-${cellType}`);
         return cell;
     }
 
-    /**
-     * Creates and returns a button element with the specified label and action.
-     *
-     * @param {string} label - The label or text content for the button.
-     * @param {Function} action - The function to be executed when the button is clicked.
-     * @returns {HTMLButtonElement} The HTML button element.
-     */
     createButton(label, action) {
         const button = document.createElement('button');
         button.textContent = label;
@@ -711,7 +675,6 @@ refreshTable() {
         button.addEventListener('click', action);
         return button;
     }
-
 
     /**
      * Toggles the selection of a product row.
