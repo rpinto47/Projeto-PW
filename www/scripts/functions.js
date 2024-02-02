@@ -156,6 +156,14 @@ async function deleteProductType() {
 
 
 /**
+ * Delete a value from the product types enumeration and refresh the product types table.
+ */
+async function updateProductType() {
+    await ptmanager.updateProductType();
+}
+
+
+/**
  * Create a table for displaying product types.
  * @param {ProductType[]} productTypes - Array of ProductType objects.
  * @returns {HTMLTableElement} The HTML table element.
@@ -195,8 +203,13 @@ export function createProductTypesTable(productTypes) {
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", deleteProductType);
 
+    const updateButton = document.createElement("button");
+    updateButton.textContent = "Update";
+    updateButton.addEventListener("click", updateProductType);
+
     buttonCell.appendChild(addButton);
     buttonCell.appendChild(deleteButton);
+    buttonCell.appendChild(updateButton);
 
     actionRow.appendChild(buttonCell);
     tbody.appendChild(actionRow);

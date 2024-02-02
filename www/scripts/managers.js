@@ -11,23 +11,29 @@ class ProductTypeManager {
     async addProductType() {
         try {
             const name = prompt("Enter the product type name:") || "New Product";
-
+            const isNameUnique = this.productTypes.every(type => type._name !== name);
+    
+            if (!isNameUnique) {
+                alert('Another product type with the same name already exists. Please choose a unique name.');
+                return null;
+            }
+    
             if (isNaN(name.trim())) {
                 const id = await this.getIdByName(name);
-
+    
                 if (!id) {
-                    const highestId = Math.max(...this.productTypes.map(type => type.id), 0);
+                    const highestId = Math.max(...this.productTypes.map(type => type._id), 0);
                     const newId = highestId + 1;
-
+    
                     const newProductType = new ProductType(newId, name);
-
+    
                     let body = {
                         id: newProductType._id,
                         name: newProductType._name
                     };
-
+    
                     const response = await fetchJson("/product-types/", "POST", body);
-
+    
                     if (response && response.rows) {
                         this.productTypes.push(newProductType);
                         this.getAllProductTypes();
@@ -50,6 +56,7 @@ class ProductTypeManager {
             return null;
         }
     }
+    
 
     async deleteProductType() {
         try {
@@ -87,37 +94,40 @@ class ProductTypeManager {
     async updateProductType() {
         try {
             const nameToUpdate = prompt("Enter the product type name to update:");
-
+    
             if (!nameToUpdate.trim()) {
                 alert('Invalid input. Name must be a non-empty string.');
                 return null;
             }
-
+    
             const idToUpdate = await this.getIdByName(nameToUpdate);
-
+    
             if (idToUpdate) {
                 const newName = prompt(`Enter the new name for ${nameToUpdate}:`) || nameToUpdate;
-
+    
                 if (isNaN(newName.trim())) {
-                    const updatedProductType = new ProductType(idToUpdate, newName);
-
-                    let body = {
-                        id: updatedProductType._id,
-                        name: updatedProductType._name
-                    };
-
-                    const response = await fetchJson(`/product-types/${idToUpdate}`, "PUT", body);
-
-                    if (response && response.rows) {
-                        this.productTypes = this.productTypes.map(type =>
-                            type._id === idToUpdate ? updatedProductType : type
-                        );
-                        this.getAllProductTypes();
-                        refreshProductTypesTable();
-                        console.log(`Product type "${nameToUpdate}" updated successfully.`);
-                        return updatedProductType;
+                    const productTypeToUpdate = this.productTypes.find(type => type._id === idToUpdate);
+    
+                    if (productTypeToUpdate) {
+                        productTypeToUpdate._name = newName;
+    
+                        let body = {
+                            nameToUpdate: nameToUpdate,
+                            newName: newName
+                        };
+    
+                        const response = await fetchJson(`/product-types/${idToUpdate}`, "PUT", body);
+    
+                        if (response && response.rows) {
+                            refreshProductTypesTable();
+                            console.log(`Product type "${nameToUpdate}" updated successfully.`);
+                            return productTypeToUpdate;
+                        } else {
+                            console.error('Error updating product type in the database:', response.error);
+                            return null;
+                        }
                     } else {
-                        console.error('Error updating product type in the database:', response.error);
+                        console.error('Product type with the provided _id not found.');
                         return null;
                     }
                 } else {
@@ -133,8 +143,7 @@ class ProductTypeManager {
             return null;
         }
     }
-
-
+    
 
     async getAllProductTypes() {
         try {
@@ -193,19 +202,27 @@ class ProductManager {
     async addProduct() {
         try {
             const name = prompt("Enter the product name:") || "New Product";
+    
+            const isNameUnique = this.products.every(product => product._name !== name);
+    
+            if (!isNameUnique) {
+                alert('Another product with the same name already exists. Please choose a unique name.');
+                return null;
+            }
+    
             const quantity = 1;
             const price = parseFloat(prompt("Enter the product price:") || 0.0);
             const productType = prompt("Enter the product type:") || "";
-
-            if (isNaN(name.trim()) && !isNaN(quantity) && !isNaN(price)) {
+    
+            if (!isNaN(quantity) && !isNaN(price)) {
                 const id = await this.getIdByName(name);
-
+    
                 if (!id) {
-                    const highestId = Math.max(...this.products.map(product => product.id), 0);
+                    const highestId = Math.max(...this.products.map(product => product._id), 0);
                     const newId = highestId + 1;
-
+    
                     const newProduct = new Product(newId, name, quantity, price, productType);
-
+    
                     let body = {
                         id: newProduct._id,
                         name: newProduct._name,
@@ -213,9 +230,11 @@ class ProductManager {
                         price: newProduct._price,
                         productType: newProduct._productType
                     };
-
+    
                     const response = await fetchJson("/products/", "POST", body);
+    
                     console.log("adicionar product", response);
+    
                     if (response) {
                         if (response.rows) {
                             this.products.push(newProduct);
@@ -234,7 +253,7 @@ class ProductManager {
                     return null;
                 }
             } else {
-                alert('Invalid input. Name must not be a number, and quantity/price must be valid numbers.');
+                alert('Invalid input. Quantity and price must be valid numbers.');
                 return null;
             }
         } catch (error) {
@@ -242,7 +261,7 @@ class ProductManager {
             return null;
         }
     }
-
+    
 
     
     async deleteProduct(nameToDelete) {
@@ -284,21 +303,29 @@ class ProductManager {
 
     async updateProduct(nameToUpdate) {
         console.log("Product name to update:", nameToUpdate);
-
+    
         try {
             if (!nameToUpdate || !nameToUpdate.trim()) {
                 alert('Invalid input. Name must be a non-empty string.');
                 return null;
             }
-
+    
             const productToUpdate = this.products.find(product => product._name === nameToUpdate);
-
+    
             if (productToUpdate) {
                 const updatedName = prompt("Enter the updated product name:") || productToUpdate._name;
+    
+                const isNameUnique = this.products.every(product => product._name !== updatedName);
+    
+                if (!isNameUnique) {
+                    alert('Another product with the same name already exists. Please choose a unique name.');
+                    return null;
+                }
+    
                 const updatedQuantity = parseInt(prompt("Enter the updated quantity:") || productToUpdate._quantity, 10);
                 const updatedPrice = parseFloat(prompt("Enter the updated price:") || productToUpdate._price);
                 const updatedProductType = prompt("Enter the updated product type:") || productToUpdate._productType;
-
+    
                 if (!isNaN(updatedQuantity) && !isNaN(updatedPrice)) {
                     const body = {
                         id: productToUpdate._id,
@@ -307,17 +334,17 @@ class ProductManager {
                         price: updatedPrice,
                         productType: updatedProductType
                     };
-
+    
                     const response = await fetchJson(`/products/${productToUpdate._id}`, "PUT", body);
-
+    
                     console.log("Response from the server:", response);
-
+    
                     if (response && response.rows) {
                         productToUpdate._name = updatedName;
                         productToUpdate._quantity = updatedQuantity;
                         productToUpdate._price = updatedPrice;
                         productToUpdate._productType = updatedProductType;
-
+    
                         console.log(`Product "${nameToUpdate}" updated successfully.`);
                         menu.refreshTable();
                         alert('Successfully updated');
@@ -339,6 +366,7 @@ class ProductManager {
             return null;
         }
     }
+    
     
     
     async getAllProducts() {
